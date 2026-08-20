@@ -179,7 +179,7 @@ escribir_y_preguntar:
     syscall
 
 terminar:
-    ; --- syscall exit(0) ---
+    ; syscall exit 60
     mov     rax, 60             ; syscall exit
     xor     rdi, rdi
     syscall
