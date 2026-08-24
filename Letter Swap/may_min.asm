@@ -33,9 +33,9 @@ _start:
  
     movzx   eax, byte [buffer + rbx]
  
-    cmp     al, 0x40        ; BUG: should be 0x41
+    cmp     al, 0x40       
     jl      .next
-    cmp     al, 0x5B        ; BUG: should be 0x5A
+    cmp     al, 0x5B        
     jg      .try_lower
     add     al, 0x20
     mov     [buffer + rbx], al
