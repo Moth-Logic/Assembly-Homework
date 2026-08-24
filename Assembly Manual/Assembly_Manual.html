@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Ensamblador Cheat Sheet — NASM x86-64 / GAS ARM AA32</title>
+<style>
+  @import url('https://cdnjs.cloudflare.com/ajax/libs/JetBrains-Mono/2.304/web/jetbrains-mono.css');
+
+  :root{
+    --bg: #0a0d0a;
+    --panel: #0f140f;
+    --panel-line: #1e2b1e;
+    --green: #7fe89a;
+    --green-dim: #4f8a63;
+    --amber: #ffb238;
+    --amber-dim: #b9832a;
+    --text: #c9e6d2;
+    --text-dim: #6f8a79;
+    --white: #eafff0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
+      var(--bg);
+    color:var(--text);
+    font-family:'JetBrains Mono', ui-monospace, Consolas, monospace;
+    padding:28px 20px 60px;
+  }
+  .wrap{max-width:1180px; margin:0 auto;}
+
+  header{
+    border-bottom:1px solid var(--panel-line);
+    padding-bottom:18px;
+    margin-bottom:22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  header .title{
+    font-size:26px;
+    color:var(--white);
+    letter-spacing:0.5px;
+    font-weight:700;
+  }
+  header .title span{color:var(--amber);}
+  header .sub{
+    color:var(--text-dim);
+    font-size:12.5px;
+    line-height:1.6;
+    max-width:560px;
+  }
+  header .crumb{
+    color:var(--green-dim);
+    font-size:12px;
+  }
+
+  section.block{margin-bottom:26px;}
+  .sec-title{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    color:var(--white);
+    border-left:3px solid var(--amber);
+    padding-left:10px;
+    margin:0 0 12px;
+  }
+  .sec-title small{
+    display:block;
+    color:var(--text-dim);
+    text-transform:none;
+    letter-spacing:0;
+    font-size:11px;
+    margin-top:3px;
+    font-weight:400;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(270px, 1fr));
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .grid.wide{grid-template-columns:repeat(auto-fit, minmax(420px, 1fr));}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:14px 16px 16px;
+  }
+  .card h2{
+    margin:0 0 10px;
+    font-size:12.5px;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    color:var(--amber);
+    border-bottom:1px dashed var(--panel-line);
+    padding-bottom:8px;
+  }
+  .card h2 small{
+    color:var(--text-dim);
+    text-transform:none;
+    letter-spacing:0;
+    font-size:10.5px;
+    margin-left:6px;
+  }
+  .card p.explain{
+    font-size:12px;
+    line-height:1.7;
+    color:var(--text);
+    margin:0 0 10px;
+  }
+  .card p.explain b{color:var(--white);}
+  .card p.explain code{
+    color:var(--green);
+    background:#0a1a0f;
+    padding:1px 5px;
+    border-radius:3px;
+    border:1px solid var(--panel-line);
+  }
+
+  pre{
+    margin:0;
+    white-space:pre-wrap;
+    word-break:break-word;
+    font-size:12.3px;
+    line-height:1.62;
+    color:var(--green);
+  }
+  .cm{color:var(--text-dim);}
+  .kw{color:var(--amber);}
+  .reg{color:#8ecfff;}
+  .str{color:#e3c98a;}
+  .idx{color:#ff9d9d;}
+
+  table{width:100%; border-collapse:collapse; font-size:12.3px;}
+  th, td{
+    text-align:left;
+    padding:5px 6px;
+    border-bottom:1px solid var(--panel-line);
+  }
+  th{
+    color:var(--amber-dim);
+    font-weight:600;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+  td.reg{color:#8ecfff; font-weight:600;}
+  td.num{color:var(--white); text-align:center;}
+  tr:last-child td{border-bottom:none;}
+
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:640px){ .two-col{grid-template-columns:1fr;} }
+
+  .colhead{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:var(--text-dim);
+    margin-bottom:6px;
+  }
+  .colhead.n{color:var(--amber-dim);}
+  .colhead.g{color:var(--green-dim);}
+
+  .tag{
+    display:inline-block;
+    font-size:10px;
+    padding:1px 6px;
+    border-radius:3px;
+    border:1px solid var(--panel-line);
+    color:var(--text-dim);
+    margin-left:6px;
+  }
+
+  .regbar{
+    display:flex;
+    border:1px solid var(--panel-line);
+    border-radius:4px;
+    overflow:hidden;
+    margin-top:8px;
+    font-size:11px;
+  }
+  .regbar div{
+    padding:8px 4px;
+    text-align:center;
+    border-right:1px solid var(--panel-line);
+  }
+  .regbar div:last-child{border-right:none;}
+  .regbar .b64{flex:8; background:#12210f; color:var(--green);}
+  .regbar .b32{flex:4; background:#182b13; color:var(--green);}
+  .regbar .b16{flex:2; background:#1e3517; color:var(--amber);}
+  .regbar .b8{flex:1; background:#26401c; color:#ff9d9d;}
+
+  footer{
+    margin-top:26px;
+    padding-top:14px;
+    border-top:1px solid var(--panel-line);
+    color:var(--text-dim);
+    font-size:11px;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="title">ensamblador<span>::</span>cheatsheet</div>
+      <div class="sub">Linux syscalls sin libc — NASM (x86-64, sintaxis Intel) y GAS (ARM AA32, Raspberry Pi). IC-3101 Arquitectura de Computadoras.</div>
+    </div>
+    <div class="crumb">$ man asm &nbsp;|&nbsp; two archs, one kernel</div>
+  </header>
+
+  <!-- ESTRUCTURA DEL ARCHIVO -->
+  <section class="block">
+  <div class="two-col" style="margin-bottom:14px;">
+    <div class="card">
+      <div class="colhead n">Estructura — NASM x86-64</div>
+      <pre><span class="kw">section</span> .data
+    <span class="cm">; constantes, texto ya inicializado</span>
+    msg: <span class="kw">db</span> <span class="str">"Hola"</span>, 10
+    len: <span class="kw">equ</span> $ - msg
+
+<span class="kw">section</span> .bss
+    <span class="cm">; espacio reservado, sin valor inicial</span>
+    buf: <span class="kw">resb</span> 64
+
+<span class="kw">section</span> .text
+    <span class="kw">global</span> _start
+_start:
+    <span class="cm">; punto de entrada del programa</span></pre>
+    </div>
+    <div class="card">
+      <div class="colhead g">Estructura — GAS ARM AA32</div>
+      <pre><span class="kw">.section</span> .data
+    <span class="cm">@ constantes, texto ya inicializado</span>
+msg:
+    <span class="kw">.ascii</span> <span class="str">"Hola\n"</span>
+    <span class="kw">.equ</span> len, . - msg
+
+<span class="kw">.section</span> .bss
+    <span class="cm">@ espacio reservado, sin valor inicial</span>
+    <span class="kw">.lcomm</span> buf, 64
+
+<span class="kw">.section</span> .text
+<span class="kw">.global</span> _start
+_start:
+    <span class="cm">@ punto de entrada del programa</span></pre>
+    </div>
+  </div>
+  </section>
+
+  <!-- COMENTARIOS Y ENSAMBLADO -->
+  <section class="block">
+  <div class="grid">
+    <div class="card">
+      <h2>Comentarios</h2>
+      <table>
+        <tr><th>Herramienta</th><th>Símbolo</th><th>Ejemplo</th></tr>
+        <tr><td class="reg">NASM</td><td class="num">;</td><td>mov rax,1 &nbsp;<span class="cm">; nota</span></td></tr>
+        <tr><td class="reg">GAS/ARM</td><td class="num">@</td><td>mov r0,#1 &nbsp;<span class="cm">@ nota</span></td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h2>Longitud de cadena <small>sin contar a mano</small></h2>
+      <table>
+        <tr><th>NASM</th><th>GAS</th></tr>
+        <tr><td class="reg">$ - etiqueta</td><td class="reg">. - etiqueta</td></tr>
+      </table>
+      <pre style="margin-top:8px;">len <span class="kw">equ</span> $ - msg    <span class="cm">; NASM</span>
+.equ len, . - msg <span class="cm">@ GAS</span></pre>
+    </div>
+    <div class="card">
+      <h2>Ensamblar + enlazar</h2>
+      <pre><span class="cm"># x86-64 (PC)</span>
+nasm -f elf64 f.asm -o f.o
+ld f.o -o f
+
+<span class="cm"># ARM AA32 (Raspberry Pi, nativo)</span>
+as f.s -o f.o
+ld f.o -o f</pre>
+    </div>
+  </div>
+  </section>
+
+  <!-- REGISTROS -->
+  <section class="block">
+  <div class="two-col" style="margin-bottom:14px;">
+    <div class="card">
+      <div class="colhead n">Registros clave — x86-64</div>
+      <table>
+        <tr><th>Registro</th><th>Rol típico</th></tr>
+        <tr><td class="reg">RAX</td><td>Nº de syscall / valor de retorno</td></tr>
+        <tr><td class="reg">RDI</td><td>1er argumento</td></tr>
+        <tr><td class="reg">RSI</td><td>2do argumento</td></tr>
+        <tr><td class="reg">RDX</td><td>3er argumento</td></tr>
+        <tr><td class="reg">R10</td><td>4to argumento</td></tr>
+        <tr><td class="reg">R8</td><td>5to argumento</td></tr>
+        <tr><td class="reg">R9</td><td>6to argumento</td></tr>
+      </table>
+      <div style="margin-top:8px;" class="colhead">Tamaños del mismo registro</div>
+      <table>
+        <tr><th>AL</th><th>AX</th><th>EAX</th><th>RAX</th></tr>
+        <tr><td class="num">8b</td><td class="num">16b</td><td class="num">32b</td><td class="num">64b</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="colhead g">Registros clave — ARM AA32</div>
+      <table>
+        <tr><th>Registro</th><th>Rol típico</th></tr>
+        <tr><td class="reg">r7</td><td>Nº de syscall</td></tr>
+        <tr><td class="reg">r0</td><td>1er argumento / valor de retorno</td></tr>
+        <tr><td class="reg">r1</td><td>2do argumento</td></tr>
+        <tr><td class="reg">r2</td><td>3er argumento</td></tr>
+        <tr><td class="reg">r3–r6</td><td>4to–7mo argumento</td></tr>
+        <tr><td class="reg">sp / lr / pc</td><td>pila / retorno / contador de programa</td></tr>
+      </table>
+      <div style="margin-top:8px;" class="colhead">Instrucción para invocar</div>
+      <table>
+        <tr><th>x86-64</th><th>x86 (32b, clásico)</th><th>ARM AA32</th></tr>
+        <tr><td class="reg num">syscall</td><td class="reg num">int 0x80</td><td class="reg num">svc 0</td></tr>
+      </table>
+    </div>
+  </div>
+  </section>
+
+  <!-- =========== NUEVO: JERARQUIA DE REGISTROS =========== -->
+  <section class="block">
+    <div class="sec-title">Un registro, cuatro nombres <small>por qué RAX, EAX, AX y AL son "el mismo cajón"</small></div>
+    <div class="card">
+      <p class="explain">
+        RAX no son 4 registros distintos — es <b>un solo registro de 64 bits</b> al que le puedes pedir
+        "dame solo los primeros N bits". Cuando escribes en <code>AL</code>, en realidad estás escribiendo
+        en los 8 bits más bajos de RAX; el resto de RAX queda intacto (o parcialmente, según la instrucción).
+        Es como tener una caja de 8 bytes y poder pedir "dame solo el primer byte" sin tocar los otros 7.
+      </p>
+      <div class="regbar">
+        <div class="b64">RAX (64 bits — todo el registro)</div>
+      </div>
+      <div class="regbar">
+        <div class="b32">EAX (32 bits bajos)</div>
+        <div class="b32" style="background:#0d1a0a; color:var(--text-dim);">(bits 32-63, no usados)</div>
+      </div>
+      <div class="regbar">
+        <div class="b16">AX (16 bits bajos)</div>
+        <div class="b16" style="background:#0d1a0a; color:var(--text-dim);">·</div>
+        <div class="b16" style="background:#0d1a0a; color:var(--text-dim);">·</div>
+      </div>
+      <div class="regbar">
+        <div class="b8">AH<br><span class="cm" style="font-size:9px;">byte alto de AX</span></div>
+        <div class="b8">AL<br><span class="cm" style="font-size:9px;">byte bajo — este es el que usas para chars</span></div>
+        <div class="b8" style="background:#0d1a0a; color:var(--text-dim);">·</div>
+        <div class="b8" style="background:#0d1a0a; color:var(--text-dim);">·</div>
+        <div class="b8" style="background:#0d1a0a; color:var(--text-dim);">·</div>
+        <div class="b8" style="background:#0d1a0a; color:var(--text-dim);">·</div>
+        <div class="b8" style="background:#0d1a0a; color:var(--text-dim);">·</div>
+        <div class="b8" style="background:#0d1a0a; color:var(--text-dim);">·</div>
+      </div>
+      <p class="explain" style="margin-top:12px;">
+        Por eso en el conversor de mayúsculas usamos <code>AL</code>: un caracter ASCII cabe en un byte,
+        así que no tiene sentido cargar los 64 bits de RAX para comparar una sola letra.
+      </p>
+      <p class="explain">
+        <b>movzx</b> ("move with zero-extend") es como decís "quiero cargar un byte de memoria, pero guardarlo
+        en un registro más grande, y que los bits extra se rellenen con cero (no con basura)":
+        <code>movzx eax, byte [buffer + rbx]</code> agarra 1 byte de memoria y lo mete en EAX limpio,
+        con los demás bits de EAX en 0. Si no hicieras esto y usaras <code>mov al, [buffer+rbx]</code>,
+        el resto de EAX (bits 8-31) quedaría con lo que sea que tenía antes — no importa si luego solo usas AL,
+        pero es buena práctica y a veces necesario para comparaciones de 32 bits limpias.
+      </p>
+    </div>
+  </section>
+
+  <!-- =========== NUEVO: MEMORIA Y DIRECCIONAMIENTO =========== -->
+  <section class="block">
+    <div class="sec-title">Direccionamiento de memoria <small>qué es "buffer", y qué hace [buffer + rbx]</small></div>
+    <div class="two-col">
+      <div class="card">
+        <p class="explain">
+          <code>buffer:  resb 101</code> en <code>.bss</code> no "crea" nada con contenido —
+          reserva 101 bytes contiguos en memoria y le pone la etiqueta <code>buffer</code> a
+          la <b>dirección donde empieza</b> ese espacio. <code>buffer</code> es literalmente
+          un número (una dirección de memoria), no una variable con valor — es más parecido a
+          un puntero fijo en C que a una variable de Python.
+        </p>
+        <p class="explain">
+          Por default, todo <code>.bss</code> arranca en 0 (el kernel te da páginas limpias),
+          así que <code>buffer</code> empieza siendo 101 bytes de <code>0x00</code> hasta que
+          el <code>read</code> syscall escribe la entrada del usuario ahí encima.
+        </p>
+      </div>
+      <div class="card">
+        <p class="explain">
+          <code>[buffer + rbx]</code> es <b>direccionamiento indexado</b>: los corchetes
+          <code>[ ]</code> significan "no quiero el número, quiero <i>lo que está guardado</i>
+          en esa dirección de memoria" (como el <code>*</code> de un puntero en C).
+        </p>
+        <pre>movzx eax, byte <span class="idx">[buffer + rbx]</span>
+<span class="cm">;                 ^dirección base  ^offset (índice)
+; = "lee 1 byte de memoria en (buffer + rbx)"
+; si rbx=0 -> primer char
+; si rbx=1 -> segundo char, etc.</span></pre>
+        <p class="explain" style="margin-top:8px;">
+          Es exactamente lo mismo que <code>buffer[rbx]</code> en C, o <code>buffer[i]</code>
+          en Python — solo que en ensamblador tienes que escribir explícitamente "esto es una
+          dirección + un índice, ve a leer ahí".
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========== NUEVO: SALTOS CONDICIONALES =========== -->
+  <section class="block">
+    <div class="sec-title">Saltos condicionales <small>jg, jl, jge, jle y compañía — cómo se leen</small></div>
+    <div class="card">
+      <p class="explain">
+        Todo salto condicional funciona igual: primero un <code>cmp a, b</code> (que internamente hace
+        <code>a - b</code> y guarda el resultado en las <b>flags</b> del CPU, sin modificar <code>a</code>),
+        y luego el salto revisa esas flags. <code>cmp al, 0x41</code> seguido de <code>jl etiqueta</code>
+        se lee como <b>"si al &lt; 0x41, salta"</b> — el orden es siempre "cmp <u>primero</u>, <u>segundo</u>"
+        igual que en una resta.
+      </p>
+      <table style="margin-top:10px;">
+        <tr><th>Instrucción</th><th>Significa</th><th>Se usa para</th></tr>
+        <tr><td class="reg">je / jz</td><td>salta si son iguales (a == b)</td><td>comparar caracteres/valores exactos</td></tr>
+        <tr><td class="reg">jne / jnz</td><td>salta si son distintos (a != b)</td><td>lo contrario de je</td></tr>
+        <tr><td class="reg">jl</td><td>salta si a &lt; b <span class="tag">con signo</span></td><td>límite inferior de un rango</td></tr>
+        <tr><td class="reg">jg</td><td>salta si a &gt; b <span class="tag">con signo</span></td><td>límite superior de un rango</td></tr>
+        <tr><td class="reg">jle</td><td>salta si a &lt;= b <span class="tag">con signo</span></td><td>igual que jl pero incluye el límite</td></tr>
+        <tr><td class="reg">jge</td><td>salta si a &gt;= b <span class="tag">con signo</span></td><td>igual que jg pero incluye el límite</td></tr>
+        <tr><td class="reg">jb</td><td>salta si a &lt; b <span class="tag">sin signo</span></td><td>comparar direcciones/tamaños (nunca negativos)</td></tr>
+        <tr><td class="reg">ja</td><td>salta si a &gt; b <span class="tag">sin signo</span></td><td>igual, sin signo</td></tr>
+        <tr><td class="reg">jmp</td><td>salta siempre, sin condición</td><td>loops, saltar bloques enteros</td></tr>
+      </table>
+      <p class="explain" style="margin-top:10px;">
+        <b>¿Por qué existen versiones "con signo" y "sin signo" (jl/jb, jg/ja)?</b>
+        Los bytes en el CPU no saben si son "positivos o negativos" — eso es una interpretación tuya.
+        <code>jl</code>/<code>jg</code>/<code>jle</code>/<code>jge</code> asumen que los números son
+        con signo (pueden ser negativos). <code>jb</code>/<code>ja</code>/<code>jbe</code>/<code>jae</code>
+        asumen que son sin signo (siempre positivos — direcciones de memoria, longitudes, bytes ASCII).
+        Para comparar caracteres ASCII (0-255) ambos dan el mismo resultado, pero la convención correcta
+        es usar las versiones <b>sin signo</b> (jb/ja) porque un char nunca es negativo.
+      </p>
+      <p class="explain">
+        Patrón típico para "¿está al dentro del rango [LO, HI]?":
+      </p>
+      <pre>cmp al, LO
+jl  .fuera_de_rango    <span class="cm">; si es menor que el límite bajo, no está</span>
+cmp al, HI
+jg  .fuera_de_rango    <span class="cm">; si es mayor que el límite alto, no está</span>
+<span class="cm">; si llegaste aquí, SI está en el rango</span></pre>
+    </div>
+  </section>
+
+  <!-- =========== NUEVO: LOOPS =========== -->
+  <section class="block">
+    <div class="sec-title">El patrón de loop <small>cómo se recorre un buffer carácter por carácter</small></div>
+    <div class="card">
+      <p class="explain">
+        Ensamblador no tiene <code>for</code> ni <code>while</code> — el patrón se arma a mano con
+        3 piezas: un <b>índice</b> (empieza en 0), un <b>límite</b> (cuántas veces repetir), y un
+        <b>salto condicional</b> al inicio del bloque. Es exactamente lo mismo que hace un
+        <code>for(int i=0; i&lt;n; i++)</code> por debajo del capó.
+      </p>
+      <pre>xor rbx, rbx         <span class="cm">; rbx = 0        -> índice / contador</span>
+.loop:
+cmp rbx, rcx          <span class="cm">; ¿ya llegué al límite (rcx)?</span>
+jge .fin              <span class="cm">; si índice >= límite, termina el loop</span>
+
+    <span class="cm">; ... cuerpo del loop, usa [buffer + rbx] ...</span>
+
+inc rbx               <span class="cm">; índice++</span>
+jmp .loop              <span class="cm">; vuelve a revisar la condición</span>
+.fin:</pre>
+      <p class="explain" style="margin-top:8px;">
+        <code>xor rbx, rbx</code> es la forma "elegante" de poner un registro en 0 (más rápido en
+        ciclos de CPU que <code>mov rbx, 0</code>, y es una convención muy común — la vas a ver en
+        casi todo código ensamblador real).
+      </p>
+    </div>
+  </section>
+
+  <!-- =========== NUEVO: TRUCO XOR =========== -->
+  <section class="block">
+    <div class="sec-title">El truco de XOR para mayúsculas/minúsculas <small>por qué un solo XOR reemplaza add + sub</small></div>
+    <div class="card">
+      <p class="explain">
+        'A' es <code>0x41</code> = <code>0100 0001</code> en binario. 'a' es <code>0x61</code> =
+        <code>0110 0001</code>. La <b>única</b> diferencia es el bit 5 (<code>0x20</code>).
+        Ese patrón se repite para <u>cada</u> par de letras (B/b, C/c... Z/z), porque el alfabeto
+        mayúsculo y minúsculo están separados exactamente por esa distancia en la tabla ASCII.
+      </p>
+      <p class="explain">
+        <code>xor al, 0x20</code> invierte ese bit — si estaba en 0 lo pone en 1 (mayúscula → minúscula)
+        y si estaba en 1 lo pone en 0 (minúscula → mayúscula). El mismo XOR sirve para <b>las dos
+        direcciones</b>, por eso reemplaza tener <code>add al, 0x20</code> en un caso y
+        <code>sub al, 0x20</code> en el otro.
+      </p>
+      <table>
+        <tr><th>Char</th><th>Hex</th><th>Binario</th><th>XOR 0x20</th><th>Resultado</th></tr>
+        <tr><td>H</td><td class="num">0x48</td><td>0100 1000</td><td>0010 0000</td><td class="num">0x68 = 'h'</td></tr>
+        <tr><td>e</td><td class="num">0x65</td><td>0110 0101</td><td>0010 0000</td><td class="num">0x45 = 'E'</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- SYSCALLS -->
+  <div class="card" style="margin-bottom:14px;">
+    <h2>Syscalls más usadas <small>tabla clásica int 0x80 — ARM la reutiliza</small></h2>
+    <p class="explain">
+      El número que pones en RAX (x86-64) o r7 (ARM) le dice al kernel <b>qué</b> operación quieres.
+      Los demás registros (RDI/RSI/RDX o r0/r1/r2) son los "argumentos" de esa función, en orden fijo —
+      es exactamente como llamar una función, solo que en vez de <code>call write(fd, buf, len)</code>
+      cargas los argumentos en registros específicos y ejecutas <code>syscall</code>/<code>svc 0</code>
+      para que el kernel tome el control.
+    </p>
+    <table>
+      <tr><th>Syscall</th><th>Nº x86-64 (rax)</th><th>Nº ARM AA32 (r7)</th><th>Argumentos</th><th>Uso</th></tr>
+      <tr><td class="reg">read</td><td class="num">0</td><td class="num">3</td><td>fd, buf, count</td><td>Leer datos (teclado, archivo)</td></tr>
+      <tr><td class="reg">write</td><td class="num">1</td><td class="num">4</td><td>fd, buf, count</td><td>Escribir datos (pantalla, archivo)</td></tr>
+      <tr><td class="reg">exit</td><td class="num">60</td><td class="num">1</td><td>código de salida</td><td>Terminar el proceso</td></tr>
+    </table>
+    <div style="margin-top:8px; color:var(--text-dim); font-size:11.5px;">fd: 0 = stdin, 1 = stdout, 2 = stderr</div>
+    <p class="explain" style="margin-top:8px;">
+      <code>read</code> devuelve en RAX/r0 <b>cuántos bytes realmente leyó</b> — no asumas que siempre
+      llena el buffer completo. Por eso guardamos ese valor (ej. en RCX) y lo usamos después para el
+      <code>write</code> de salida, en vez de escribir un tamaño fijo (ese fue justo el bug del "copy-paste"
+      que vimos en la v4 del conversor).
+    </p>
+  </div>
+
+  <!-- EJEMPLO WRITE -->
+  <div class="two-col" style="margin-bottom:14px;">
+    <div class="card">
+      <div class="colhead n">write(1, msg, len) — NASM</div>
+      <pre><span class="kw">mov</span>  rax, 1      <span class="cm">; syscall write</span>
+<span class="kw">mov</span>  rdi, 1      <span class="cm">; fd = stdout</span>
+<span class="kw">mov</span>  rsi, msg    <span class="cm">; buffer</span>
+<span class="kw">mov</span>  rdx, len    <span class="cm">; longitud</span>
+<span class="kw">syscall</span></pre>
+    </div>
+    <div class="card">
+      <div class="colhead g">write(1, msg, len) — GAS ARM</div>
+      <pre><span class="kw">mov</span>  r7, #4      <span class="cm">@ syscall write</span>
+<span class="kw">mov</span>  r0, #1      <span class="cm">@ fd = stdout</span>
+<span class="kw">ldr</span>  r1, =msg    <span class="cm">@ buffer</span>
+<span class="kw">ldr</span>  r2, =len    <span class="cm">@ longitud</span>
+<span class="kw">svc</span>  0</pre>
+    </div>
+  </div>
+
+  <!-- INSTRUCCIONES COMUNES -->
+  <div class="card" style="margin-bottom:14px;">
+    <h2>Instrucciones comunes <small>mover datos, comparar, saltar</small></h2>
+    <table>
+      <tr><th>Acción</th><th>NASM (Intel)</th><th>GAS (ARM)</th></tr>
+      <tr><td>Mover valor</td><td class="reg">mov rax, 5</td><td class="reg">mov r0, #5</td></tr>
+      <tr><td>Cargar dirección</td><td class="reg">mov rsi, msg</td><td class="reg">ldr r1, =msg</td></tr>
+      <tr><td>Sumar</td><td class="reg">add rax, 1</td><td class="reg">add r0, r0, #1</td></tr>
+      <tr><td>Restar</td><td class="reg">sub rax, 1</td><td class="reg">sub r0, r0, #1</td></tr>
+      <tr><td>Comparar</td><td class="reg">cmp al, 'a'</td><td class="reg">cmp r5, #'a'</td></tr>
+      <tr><td>Saltar si igual</td><td class="reg">je etiqueta</td><td class="reg">beq etiqueta</td></tr>
+      <tr><td>Saltar siempre</td><td class="reg">jmp etiqueta</td><td class="reg">b etiqueta</td></tr>
+      <tr><td>Poner en 0</td><td class="reg">xor rdi, rdi</td><td class="reg">mov r0, #0</td></tr>
+      <tr><td>Invertir bit (toggle)</td><td class="reg">xor al, 0x20</td><td class="reg">eor r0, r0, #0x20</td></tr>
+      <tr><td>Cargar byte c/ zero-extend</td><td class="reg">movzx eax, byte [buf+rbx]</td><td class="reg">ldrb r0, [r1, r2]</td></tr>
+    </table>
+  </div>
+
+  <!-- =========== NUEVO: MAKEFILE =========== -->
+  <section class="block">
+    <div class="sec-title">Makefile <small>referencia rápida — ver también la lección paso a paso</small></div>
+    <div class="card">
+      <p class="explain">
+        Regla: <code>target: dependencias</code> en una línea, y el comando en la siguiente
+        <b>empezando con TAB</b> (no espacios). <code>make</code> solo reconstruye si el target
+        es más viejo que sus dependencias.
+      </p>
+      <pre>SRC = case_swap.asm
+OBJ = case_swap.o
+BIN = case_swap
+
+all: $(BIN)
+
+$(OBJ): $(SRC)
+	nasm -f elf64 $(SRC) -o $(OBJ)
+
+$(BIN): $(OBJ)
+	ld $(OBJ) -o $(BIN)
+
+clean:
+	rm -f $(OBJ) $(BIN)
+
+.PHONY: all clean</pre>
+    </div>
+  </section>
+
+  <!-- HOLA MUNDO COMPLETO -->
+  <div class="two-col">
+    <div class="card">
+      <div class="colhead n">Hola Mundo completo — NASM</div>
+      <pre><span class="kw">section</span> .data
+    msg: <span class="kw">db</span> <span class="str">"Hola Mundo"</span>, 10
+    len: <span class="kw">equ</span> $ - msg
+
+<span class="kw">section</span> .text
+    <span class="kw">global</span> _start
+_start:
+    <span class="kw">mov</span> rax, 1
+    <span class="kw">mov</span> rdi, 1
+    <span class="kw">mov</span> rsi, msg
+    <span class="kw">mov</span> rdx, len
+    <span class="kw">syscall</span>
+
+    <span class="kw">mov</span> rax, 60
+    <span class="kw">xor</span> rdi, rdi
+    <span class="kw">syscall</span></pre>
+    </div>
+    <div class="card">
+      <div class="colhead g">Hola Mundo completo — GAS ARM</div>
+      <pre><span class="kw">.section</span> .data
+msg:
+    <span class="kw">.ascii</span> <span class="str">"Hola Mundo\n"</span>
+    <span class="kw">.equ</span> len, . - msg
+
+<span class="kw">.section</span> .text
+<span class="kw">.global</span> _start
+_start:
+    <span class="kw">mov</span> r7, #4
+    <span class="kw">mov</span> r0, #1
+    <span class="kw">ldr</span> r1, =msg
+    <span class="kw">ldr</span> r2, =len
+    <span class="kw">svc</span> 0
+
+    <span class="kw">mov</span> r7, #1
+    <span class="kw">mov</span> r0, #0
+    <span class="kw">svc</span> 0</pre>
+    </div>
+  </div>
+
+  <footer>
+    <span>IC-3101 Arquitectura de Computadoras · Tarea Corta 01 &amp; 02</span>
+    <span>x86: familia 8086→64-bit · ARM AA32: 32-bit nativo en Raspberry Pi</span>
+  </footer>
+
+</div>
+</body>
+</html>
