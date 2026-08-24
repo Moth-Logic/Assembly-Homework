@@ -29,7 +29,7 @@ _start:
     mov     rcx, rax
     xor     rbx, rbx
 
-    ; convert ONLY buffer[0]
+    ; convert buffer
     movzx   eax, byte [buffer]
 
     cmp     al, 0x41
