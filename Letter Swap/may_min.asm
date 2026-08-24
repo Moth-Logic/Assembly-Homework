@@ -26,6 +26,8 @@ _start:
     syscall              ; rax = bytes actually read (incl. '\n')
 
     mov     r12, rax     ; save length for the final write
+    mov     rcx, rax
+    xor     rbx, rbx
 
     ; convert ONLY buffer[0]
     movzx   eax, byte [buffer]
