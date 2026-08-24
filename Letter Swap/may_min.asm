@@ -5,59 +5,61 @@ section .data
     prompt_len: equ $ - prompt
 
 section .bss
-    buffer:     resb 101      ; up to 100 chars + '\n'
-
+    buffer:     resb 101
+ 
 section .text
     global _start
 
 _start:
-    ; print prompt
     mov     rax, 1
     mov     rdi, 1
     mov     rsi, prompt
     mov     rdx, prompt_len
     syscall
-
-    ; read input
+ 
     mov     rax, 0
     mov     rdi, 0
     mov     rsi, buffer
     mov     rdx, 101
-    syscall              ; rax = bytes actually read (incl. '\n')
+    syscall
+ 
+    mov     r12, rax        ; total bytes read, used later for write
+    mov     rcx, rax        ; loop counter
+    xor     rbx, rbx        ; index
 
-    mov     r12, rax     ; save length for the final write
-    mov     rcx, rax
-    xor     rbx, rbx
-
-    ; convert ONLY buffer[0]
-    movzx   eax, byte [buffer]
-
-    cmp     al, 0x41
-    jl      .skip
-    cmp     al, 0x5A
+.convert_loop:
+    cmp     rbx, rcx
+    jge     .done_convert
+ 
+    movzx   eax, byte [buffer + rbx]
+ 
+    cmp     al, 0x40        
+    jl      .next
+    cmp     al, 0x5B       
     jg      .try_lower
     add     al, 0x20
-    jmp     .store
+    mov     [buffer + rbx], al
+    jmp     .next
 
 .try_lower:
     cmp     al, 0x61
-    jl      .skip
+    jl      .next
     cmp     al, 0x7A
-    jg      .skip
+    jg      .next
     sub     al, 0x20
+    mov     [buffer + rbx], al
 
-.store:
-    mov     [buffer], al
+.next:
+    inc     rbx
+    jmp     .convert_loop
 
-.skip:
-    ; write the buffer back out
+.done_convert:
     mov     rax, 1
     mov     rdi, 1
     mov     rsi, buffer
     mov     rdx, r12
     syscall
 
-    ; exit(0)
     mov     rax, 60
     xor     rdi, rdi
     syscall
