@@ -23,9 +23,9 @@ _start:
     mov     rdx, 101
     syscall
  
-    mov     r12, rax        ; total bytes read, used later for write
-    mov     rcx, rax        ; loop counter
-    xor     rbx, rbx        ; index
+    mov     r12, rax
+    mov     rcx, rax
+    xor     rbx, rbx
  
 .convert_loop:
     cmp     rbx, rcx
@@ -33,11 +33,11 @@ _start:
  
     movzx   eax, byte [buffer + rbx]
  
-    cmp     al, 0x40       
-    jl      .next
-    cmp     al, 0x5B        
+    cmp     al, 0x41
+    jl      .try_lower
+    cmp     al, 0x5A
     jg      .try_lower
-    add     al, 0x20
+    sub     al, 0x20        
     mov     [buffer + rbx], al
     jmp     .next
  
@@ -46,7 +46,7 @@ _start:
     jl      .next
     cmp     al, 0x7A
     jg      .next
-    sub     al, 0x20
+    add     al, 0x20        
     mov     [buffer + rbx], al
  
 .next:
