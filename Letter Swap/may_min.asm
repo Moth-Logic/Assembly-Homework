@@ -1,11 +1,13 @@
 ; Julian Solorzano & Abril Gonzalez
 
+CASE_BIT   equ 0x20
+ 
 section .data
-    prompt:     db "Insert your message: "
-    prompt_len: equ $ - prompt
+    prompt:      db "Insert your message: "
+    prompt_len:  equ $ - prompt
  
 section .bss
-    buffer:     resb 101
+    buffer:      resb 101
  
 section .text
     global _start
@@ -23,7 +25,6 @@ _start:
     mov     rdx, 101
     syscall
  
-    mov     r12, rax        
     mov     rcx, rax
     xor     rbx, rbx
  
@@ -33,23 +34,24 @@ _start:
  
     movzx   eax, byte [buffer + rbx]
  
+    ; is it uppercase?
     cmp     al, 0x41
-    jl      .try_lower
+    jl      .check_lower
     cmp     al, 0x5A
-    jg      .try_lower
-    add     al, 0x20
+    jg      .check_lower
+    xor     al, CASE_BIT        ; toggle case in one shot
     mov     [buffer + rbx], al
-    jmp     .next
+    jmp     .next_char
  
-.try_lower:
+.check_lower:
     cmp     al, 0x61
-    jl      .next
+    jl      .next_char
     cmp     al, 0x7A
-    jg      .next
-    sub     al, 0x20
+    jg      .next_char
+    xor     al, CASE_BIT        ; same trick, other direction
     mov     [buffer + rbx], al
  
-.next:
+.next_char:
     inc     rbx
     jmp     .convert_loop
  
@@ -57,7 +59,7 @@ _start:
     mov     rax, 1
     mov     rdi, 1
     mov     rsi, buffer
-    mov     rdx, prompt_len 
+    mov     rdx, rcx
     syscall
  
     mov     rax, 60
