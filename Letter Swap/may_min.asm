@@ -23,7 +23,7 @@ _start:
     mov     rdx, 101
     syscall
  
-    mov     r12, rax
+    mov     r12, rax        
     mov     rcx, rax
     xor     rbx, rbx
  
@@ -37,7 +37,7 @@ _start:
     jl      .try_lower
     cmp     al, 0x5A
     jg      .try_lower
-    sub     al, 0x20        
+    add     al, 0x20
     mov     [buffer + rbx], al
     jmp     .next
  
@@ -46,7 +46,7 @@ _start:
     jl      .next
     cmp     al, 0x7A
     jg      .next
-    add     al, 0x20        
+    sub     al, 0x20
     mov     [buffer + rbx], al
  
 .next:
@@ -57,7 +57,7 @@ _start:
     mov     rax, 1
     mov     rdi, 1
     mov     rsi, buffer
-    mov     rdx, r12
+    mov     rdx, prompt_len 
     syscall
  
     mov     rax, 60
