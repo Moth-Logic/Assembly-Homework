@@ -3,13 +3,13 @@
 section .data
     prompt:     db "Insert your message: "
     prompt_len: equ $ - prompt
-
+ 
 section .bss
     buffer:     resb 101
  
 section .text
     global _start
-
+ 
 _start:
     mov     rax, 1
     mov     rdi, 1
@@ -26,22 +26,21 @@ _start:
     mov     r12, rax        ; total bytes read, used later for write
     mov     rcx, rax        ; loop counter
     xor     rbx, rbx        ; index
-
-    mov     r12, rax     ; save length for the final write
-    mov     rcx, rax
-    xor     rbx, rbx
-
-    ; convert buffer
-    movzx   eax, byte [buffer]
-
-    cmp     al, 0x41
+ 
+.convert_loop:
+    cmp     rbx, rcx
+    jge     .done_convert
+ 
+    movzx   eax, byte [buffer + rbx]
+ 
+    cmp     al, 0x40        ; BUG: should be 0x41
     jl      .next
-    cmp     al, 0x5A
+    cmp     al, 0x5B        ; BUG: should be 0x5A
     jg      .try_lower
     add     al, 0x20
     mov     [buffer + rbx], al
     jmp     .next
-
+ 
 .try_lower:
     cmp     al, 0x61
     jl      .next
@@ -49,18 +48,18 @@ _start:
     jg      .next
     sub     al, 0x20
     mov     [buffer + rbx], al
-
+ 
 .next:
     inc     rbx
     jmp     .convert_loop
-
+ 
 .done_convert:
     mov     rax, 1
     mov     rdi, 1
     mov     rsi, buffer
     mov     rdx, r12
     syscall
-
+ 
     mov     rax, 60
     xor     rdi, rdi
     syscall
