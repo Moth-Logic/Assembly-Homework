@@ -27,15 +27,16 @@ _start:
     mov     rcx, rax        ; loop counter
     xor     rbx, rbx        ; index
 
-.convert_loop:
-    cmp     rbx, rcx
-    jge     .done_convert
- 
-    movzx   eax, byte [buffer + rbx]
- 
-    cmp     al, 0x40        
+    mov     r12, rax     ; save length for the final write
+    mov     rcx, rax
+    xor     rbx, rbx
+
+    ; convert buffer
+    movzx   eax, byte [buffer]
+
+    cmp     al, 0x41
     jl      .next
-    cmp     al, 0x5B       
+    cmp     al, 0x5A
     jg      .try_lower
     add     al, 0x20
     mov     [buffer + rbx], al
