@@ -1,1 +1,1 @@
-; Julian Solorzano y Abril Ganzales
+; Julian Solorzano y Abril Gonzales
