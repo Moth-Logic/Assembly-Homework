@@ -421,6 +421,116 @@ ld f.o -o f</pre>
     </div>
   </section>
 
+  <!-- =========== NUEVO: MODOS DE DIRECCIONAMIENTO =========== -->
+  <section class="block">
+    <div class="sec-title">Modos de direccionamiento <small>directo, indirecto y relativo — de qué depende dónde busca el dato el CPU</small></div>
+    <div class="card">
+      <p class="explain">
+        La pregunta que responde cada modo es siempre la misma: <b>¿de dónde saca el CPU el dato con
+        el que va a operar?</b> Cambia según si la dirección está escrita fija en la instrucción, si hay
+        que "seguir un puntero" primero, o si se calcula sumando cosas.
+      </p>
+    </div>
+
+    <div class="grid wide">
+      <div class="card">
+        <h2>1. Directo <small>la dirección está escrita en la instrucción</small></h2>
+        <p class="explain">
+          La instrucción trae <b>la dirección exacta</b> del dato, fija, tal cual — no depende de
+          ningún registro. Le decís al CPU "andá a esta dirección puntual y traé lo que hay ahí".
+        </p>
+        <pre><span class="cm">; NASM — accede a la posición de memoria etiquetada "contador"</span>
+mov eax, [contador]
+<span class="cm">;         ^^^^^^^^^ dirección fija (la etiqueta se resuelve
+;                    a un número concreto en tiempo de ensamblado)</span>
+
+<span class="cm">@ GAS — mismo concepto</span>
+ldr r0, [r1]    <span class="cm">@ r1 ya apunta a una dirección fija cargada antes</span></pre>
+        <p class="explain" style="margin-top:8px;">
+          Ojo: <code>mov eax, contador</code> (sin corchetes) NO es esto — eso carga <b>el número de
+          la dirección misma</b> (el puntero). Con corchetes <code>[contador]</code> vas y leés
+          <b>el contenido</b> que hay guardado ahí. Es la diferencia entre "dame la dirección de la casa"
+          y "dame lo que hay adentro de la casa".
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>2. Indirecto <small>un registro contiene la dirección — hay que "seguir el puntero"</small></h2>
+        <p class="explain">
+          Acá la instrucción no trae la dirección — trae <b>un registro</b>, y ese registro es el que
+          contiene la dirección real del dato. Es exactamente un puntero de C: primero tenés que leer
+          el registro para saber A DÓNDE ir, y recién ahí vas a buscar el valor.
+        </p>
+        <pre><span class="cm">; NASM</span>
+mov rbx, buffer      <span class="cm">; rbx = la dirección de buffer (un puntero)</span>
+mov al,  [rbx]        <span class="cm">; ve a esa dirección y trae 1 byte
+                       ; equivalente a: char x = *rbx;  en C</span>
+
+<span class="cm">@ GAS</span>
+ldr r1, =buffer       <span class="cm">@ r1 = dirección de buffer</span>
+ldrb r0, [r1]          <span class="cm">@ trae el byte que está en esa dirección</span></pre>
+        <p class="explain" style="margin-top:8px;">
+          La diferencia clave con "directo": acá el CPU necesita <b>dos pasos</b> — primero mirar qué
+          hay en el registro (una dirección), después ir a esa dirección. En "directo" el paso 1 no
+          existe, la dirección ya viene fija en la instrucción.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>3. Indirecto con índice/base <small>tu [buffer + rbx] de siempre</small></h2>
+        <p class="explain">
+          Es indirecto, pero sumando un desplazamiento antes de ir a buscar el dato: la dirección final
+          es <code>base + índice</code>, calculada en el momento. Así recorrés arreglos sin tener que
+          escribir una instrucción distinta por cada posición.
+        </p>
+        <pre>movzx eax, byte <span class="idx">[buffer + rbx]</span>   <span class="cm">; NASM: base=buffer, índice=rbx</span>
+ldrb  r0, [r6, r5]                <span class="cm">@ GAS:  base=r6,     índice=r5</span></pre>
+        <p class="explain" style="margin-top:8px;">
+          Ya lo usás en el loop del conversor de mayúsculas: <code>buffer</code>/<code>r6</code> es fijo
+          durante todo el loop, y <code>rbx</code>/<code>r5</code> es el que va cambiando (0, 1, 2...)
+          para recorrer cada carácter. Es <code>buffer[i]</code> pero calculado por hardware.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>4. Relativo <small>dirección calculada respecto al PC (program counter)</small></h2>
+        <p class="explain">
+          Los <b>saltos</b> (<code>jmp</code>, <code>je</code>, <code>b</code>, <code>beq</code>...) casi
+          nunca usan una dirección absoluta fija — usan un <b>desplazamiento respecto a dónde está
+          parado el CPU ahora mismo</b> (el registro PC / RIP). La instrucción no dice "andá a la
+          dirección 0x4010F2", dice "andá 12 bytes más adelante desde donde estás parado".
+        </p>
+        <pre><span class="cm">; NASM — vos escribís una etiqueta, pero el ensamblador
+; la convierte a un offset relativo al PC</span>
+jmp .siguiente
+<span class="cm">; en el binario esto queda como algo tipo: "salta +18 bytes desde aquí"</span>
+
+<span class="cm">@ GAS — igual, "b etiqueta" es relativo al PC</span>
+b .siguiente</pre>
+        <p class="explain" style="margin-top:8px;">
+          <b>Por qué importa:</b> como es relativo (no una dirección fija), el código se puede cargar
+          en cualquier posición de memoria y los saltos internos siguen funcionando igual — es lo que
+          hace posible el <b>código independiente de la posición (PIE)</b>. También por esto
+          <code>ldr r1, =msg</code> en ARM en realidad genera código PC-relativo por debajo: no existe
+          un "mov inmediato de 32 bits" directo en ARM, así que el ensamblador arma el acceso relativo
+          al PC para vos.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <div class="colhead">Resumen: ¿de dónde sale la dirección final?</div>
+      <table>
+        <tr><th>Modo</th><th>¿De dónde sale la dirección?</th><th>Ejemplo</th></tr>
+        <tr><td class="reg">Inmediato</td><td>no hay memoria involucrada, el valor va pegado en la instrucción</td><td class="reg">mov eax, 5</td></tr>
+        <tr><td class="reg">Directo</td><td>fija, escrita en la instrucción (etiqueta ya resuelta)</td><td class="reg">mov eax, [contador]</td></tr>
+        <tr><td class="reg">Indirecto</td><td>dentro de un registro (hay que leerlo primero)</td><td class="reg">mov al, [rbx]</td></tr>
+        <tr><td class="reg">Indirecto + índice</td><td>registro base + registro índice, sumados</td><td class="reg">[buffer + rbx]</td></tr>
+        <tr><td class="reg">Relativo</td><td>offset sumado al PC actual (dónde está parado el CPU)</td><td class="reg">jmp .siguiente</td></tr>
+      </table>
+    </div>
+  </section>
+
   <!-- =========== NUEVO: SALTOS CONDICIONALES =========== -->
   <section class="block">
     <div class="sec-title">Saltos condicionales <small>jg, jl, jge, jle y compañía — cómo se leen</small></div>
