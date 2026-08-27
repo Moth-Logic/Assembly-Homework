@@ -222,6 +222,9 @@
 
   <!-- ESTRUCTURA DEL ARCHIVO -->
   <section class="block">
+  <div class="sec-title">Los 3 bloques básicos de un fuente en ensamblador
+    <small>.data (inicializado) · .bss (reservado, sin valor) · .text (instrucciones)</small>
+  </div>
   <div class="two-col" style="margin-bottom:14px;">
     <div class="card">
       <div class="colhead n">Estructura — NASM x86-64</div>
@@ -575,6 +578,95 @@ jmp .loop              <span class="cm">; vuelve a revisar la condición</span>
       <tr><td>Cargar byte c/ zero-extend</td><td class="reg">movzx eax, byte [buf+rbx]</td><td class="reg">ldrb r0, [r1, r2]</td></tr>
     </table>
   </div>
+
+  <!-- =========== NUEVO: FORMATOS DE INSTRUCCION =========== -->
+  <section class="block">
+    <div class="sec-title">Formatos genéricos de instrucción <small>2 operandos (x86) vs 3 operandos (ARM)</small></div>
+    <div class="two-col">
+      <div class="card">
+        <div class="colhead n">Formato general (cualquier arquitectura)</div>
+        <pre>[etiqueta:] mnemónico  operando(s)  <span class="cm">; NASM
+</span>[etiqueta:] mnemónico  operando(s)  <span class="cm">@ GAS</span></pre>
+        <p class="explain" style="margin-top:8px;">
+          <b>etiqueta</b> (opcional): un nombre para referenciar esa dirección desde un salto.
+          <b>mnemónico</b>: el nombre de la operación (mov, add, cmp...).
+          <b>operando(s)</b>: sobre qué opera — registros, memoria, o inmediatos.
+        </p>
+      </div>
+      <div class="card">
+        <div class="colhead g">Los dos formatos que vas a ver siempre</div>
+        <pre><span class="kw">mnemónico</span>  destino, origen
+<span class="cm">-> el destino se SOBRESCRIBE con el resultado
+   ej: mov eax, 5      (x86, 2 operandos)
+       add rax, rbx    (x86: rax = rax + rbx)</span>
+
+<span class="kw">mnemónico</span>  destino, origen1, origen2
+<span class="cm">-> destino es independiente, no se pisa ningún origen
+   ej: add r0, r1, r2  (ARM: r0 = r1 + r2, r1 y r2 quedan iguales)</span></pre>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <p class="explain">
+        <b>Por qué importa la diferencia:</b> en x86 (2 operandos), sumar sin perder el valor original
+        te obliga a copiarlo antes (<code>mov rax, rbx</code> luego <code>add rax, rcx</code>).
+        En ARM (3 operandos), <code>add r0, r1, r2</code> hace la suma Y preserva r1/r2 en una sola
+        instrucción — es más expresivo, cuesta lo mismo en ciclos.
+      </p>
+    </div>
+  </section>
+
+  <!-- =========== NUEVO: INSTRUCCIONES COMPUESTAS / CONDICIONALES ARM =========== -->
+  <section class="block">
+    <div class="sec-title">Instrucciones compuestas de ARM <small>sufijos de condición y "set flags" — ej. addeqs</small></div>
+    <div class="card">
+      <p class="explain">
+        En ARM, el mnemónico completo se arma pegando <b>hasta 3 piezas</b> a la instrucción base:
+      </p>
+      <pre><span class="kw">add</span><span class="idx">eq</span><span class="reg">s</span>  r1, r2, r3
+ ^    ^   ^
+ |    |   └─ sufijo "S": actualiza las flags (N,Z,C,V) con el resultado
+ |    └───── código de condición: solo ejecuta si Z=1 (resultado de un cmp previo)
+ └────────── mnemónico base: suma</pre>
+      <p class="explain" style="margin-top:10px;">
+        <b>El truco de ARM:</b> CUALQUIER instrucción puede llevar un código de condición pegado al final
+        del mnemónico. El CPU la ejecuta o la salta como si fuera un NOP, según las flags — sin necesitar
+        un salto (<code>b</code>) explícito rodeándola. x86 no tiene esto de forma nativa: ahí tenés que
+        usar un <code>je</code>/<code>jne</code> alrededor de la instrucción.
+      </p>
+      <table style="margin-top:10px;">
+        <tr><th>Sufijo</th><th>Ejecuta si...</th></tr>
+        <tr><td class="reg">eq</td><td>Z = 1 (resultado previo fue igual / cero)</td></tr>
+        <tr><td class="reg">ne</td><td>Z = 0 (resultado previo fue distinto)</td></tr>
+        <tr><td class="reg">gt / lt</td><td>mayor / menor, con signo</td></tr>
+        <tr><td class="reg">ge / le</td><td>mayor-o-igual / menor-o-igual, con signo</td></tr>
+        <tr><td class="reg">hi / lo</td><td>mayor / menor, sin signo (unsigned)</td></tr>
+        <tr><td class="reg">s <span class="tag">sufijo aparte, no condición</span></td><td>además, actualiza las flags con el resultado de esta instrucción</td></tr>
+      </table>
+      <p class="explain" style="margin-top:10px;">Ejemplo de uso típico:</p>
+      <pre>cmp    r0, r4        <span class="cm">@ compara r0 contra r4, actualiza flags</span>
+addeqs r1, r2, r3     <span class="cm">@ SI fueron iguales (eq): r1 = r2+r3, y actualiza flags de nuevo
+                       @ SI NO fueron iguales: esta línea no hace nada, r1 no cambia</span></pre>
+    </div>
+  </section>
+
+  <!-- =========== NUEVO: NOTACION INMEDIATA / HEX =========== -->
+  <section class="block">
+    <div class="sec-title">Leer una instrucción con inmediato hex <small>ej. mov eax, DF07h</small></div>
+    <div class="card">
+      <pre><span class="kw">mov</span> eax, DF07h</pre>
+      <p class="explain" style="margin-top:8px;">
+        <code>mov</code>: transferencia de dato, no toca flags. <code>eax</code>: registro de
+        <b>32 bits</b> (mitad baja de RAX). <code>DF07h</code>: inmediato en hexadecimal — el sufijo
+        <code>h</code> es la notación clásica de Intel/MASM, equivalente a <code>0xDF07</code>.
+      </p>
+      <p class="explain">
+        <b>Qué hace:</b> carga <code>0x0000DF07</code> en EAX. El inmediato solo especifica los 16 bits
+        bajos, así que los 16 bits altos de EAX quedan en <b>cero</b> — no hay extensión de signo en un
+        <code>mov</code> directo con inmediato, aunque en binario <code>DF07h</code> = <code>1101 1111
+        0000 0111</code> tenga el bit más significativo (de 16 bits) en 1.
+      </p>
+    </div>
+  </section>
 
   <!-- =========== NUEVO: MAKEFILE =========== -->
   <section class="block">
