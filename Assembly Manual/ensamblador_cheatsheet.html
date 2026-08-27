@@ -79,23 +79,23 @@
     <div class="sec-title">Directivas de datos <small>reservar espacio vs. definir valores ya inicializados</small></div>
     <div class="card">
       <table>
-        <tr><th>NASM</th><th>GAS</th><th>Tamaño</th><th>Qué hace</th></tr>
-        <tr><td class="reg">db</td><td class="reg">.byte</td><td class="dim">1 byte</td><td>Define uno o más bytes con valor inicial. <span class="cm">db "Hola", 10</span> = string + newline.</td></tr>
-        <tr><td class="reg">dw</td><td class="reg">.hword / .short</td><td class="dim">2 bytes</td><td>Define un valor de 16 bits ya inicializado.</td></tr>
-        <tr><td class="reg">dd</td><td class="reg">.word / .long</td><td class="dim">4 bytes</td><td>Define un valor de 32 bits ya inicializado.</td></tr>
-        <tr><td class="reg">dq</td><td class="reg">.quad</td><td class="dim">8 bytes</td><td>Define un valor de 64 bits ya inicializado.</td></tr>
-        <tr><td class="reg">dt</td><td class="reg">—</td><td class="dim">10 bytes</td><td>Define un extendido de 80 bits (poco usado, coma flotante x87).</td></tr>
-        <tr><td class="reg">resb</td><td class="reg">.skip / .space (en .bss)</td><td class="dim">N bytes</td><td><b>Reserva</b> N bytes SIN inicializar (van a 0 por default en Linux). No ocupa espacio en el archivo, solo en memoria al cargar.</td></tr>
-        <tr><td class="reg">resw</td><td class="reg">.skip N*2</td><td class="dim">N×2 bytes</td><td>Reserva N palabras de 16 bits sin inicializar.</td></tr>
-        <tr><td class="reg">resd</td><td class="reg">.skip N*4</td><td class="dim">N×4 bytes</td><td>Reserva N dobles palabras de 32 bits sin inicializar.</td></tr>
-        <tr><td class="reg">resq</td><td class="reg">.skip N*8</td><td class="dim">N×8 bytes</td><td>Reserva N cuádruples palabras de 64 bits sin inicializar.</td></tr>
-        <tr><td class="reg">—</td><td class="reg">.lcomm nombre, N</td><td class="dim">N bytes</td><td>Forma "GAS nativa" de reservar N bytes en .bss (equivalente directo a resb, más idiomático que .skip).</td></tr>
-        <tr><td class="reg">—</td><td class="reg">.ascii "texto"</td><td class="dim">string</td><td>String SIN null terminator automático (como db "texto" en NASM).</td></tr>
-        <tr><td class="reg">—</td><td class="reg">.asciz "texto"</td><td class="dim">string + \0</td><td>String CON null terminator automático al final (útil si vas a usar funciones estilo C que esperan '\0').</td></tr>
-        <tr><td class="reg">times N db X</td><td class="reg">.fill N, 1, X</td><td class="dim">N bytes</td><td>Repite un valor N veces (ej: rellenar con ceros, padding).</td></tr>
-        <tr><td class="reg">equ</td><td class="reg">.equ / =</td><td class="dim">0 bytes</td><td>Constante en tiempo de ensamblado — sustitución de texto, no ocupa memoria.</td></tr>
-        <tr><td class="reg">$</td><td class="reg">.</td><td class="dim">—</td><td>"Dirección actual" — usado para calcular longitudes: <span class="cm">len equ $-msg</span></td></tr>
-        <tr><td class="reg">.align N</td><td class="reg">.align N / .balign N</td><td class="dim">—</td><td>Alinea la siguiente dirección a un múltiplo de N (rendimiento de acceso a memoria).</td></tr>
+        <tr><th>NASM</th><th>GAS</th><th>Tamaño</th><th>Qué hace</th><th>Plantilla / dónde va</th></tr>
+        <tr><td class="reg">db</td><td class="reg">.byte</td><td class="dim">1 byte</td><td>Define uno o más bytes con valor inicial. <span class="cm">db "Hola", 10</span> = string + newline.</td><td class="reg dim">etiqueta: db val1, val2, ...<br><span class="tag">dentro de section .data</span></td></tr>
+        <tr><td class="reg">dw</td><td class="reg">.hword / .short</td><td class="dim">2 bytes</td><td>Define un valor de 16 bits ya inicializado.</td><td class="reg dim">etiqueta: dw valor<br><span class="tag">dentro de section .data</span></td></tr>
+        <tr><td class="reg">dd</td><td class="reg">.word / .long</td><td class="dim">4 bytes</td><td>Define un valor de 32 bits ya inicializado.</td><td class="reg dim">etiqueta: dd valor<br><span class="tag">dentro de section .data</span></td></tr>
+        <tr><td class="reg">dq</td><td class="reg">.quad</td><td class="dim">8 bytes</td><td>Define un valor de 64 bits ya inicializado.</td><td class="reg dim">etiqueta: dq valor<br><span class="tag">dentro de section .data</span></td></tr>
+        <tr><td class="reg">dt</td><td class="reg">—</td><td class="dim">10 bytes</td><td>Define un extendido de 80 bits (poco usado, coma flotante x87).</td><td class="reg dim">etiqueta: dt valor<br><span class="tag">section .data, raro en este curso</span></td></tr>
+        <tr><td class="reg">resb</td><td class="reg">.skip / .space (en .bss)</td><td class="dim">N bytes</td><td><b>Reserva</b> N bytes SIN inicializar (van a 0 por default en Linux). No ocupa espacio en el archivo, solo en memoria al cargar.</td><td class="reg dim">etiqueta: resb N<br><span class="tag">SOLO dentro de section .bss</span></td></tr>
+        <tr><td class="reg">resw</td><td class="reg">.skip N*2</td><td class="dim">N×2 bytes</td><td>Reserva N palabras de 16 bits sin inicializar.</td><td class="reg dim">etiqueta: resw N<br><span class="tag">section .bss</span></td></tr>
+        <tr><td class="reg">resd</td><td class="reg">.skip N*4</td><td class="dim">N×4 bytes</td><td>Reserva N dobles palabras de 32 bits sin inicializar.</td><td class="reg dim">etiqueta: resd N<br><span class="tag">section .bss</span></td></tr>
+        <tr><td class="reg">resq</td><td class="reg">.skip N*8</td><td class="dim">N×8 bytes</td><td>Reserva N cuádruples palabras de 64 bits sin inicializar.</td><td class="reg dim">etiqueta: resq N<br><span class="tag">section .bss</span></td></tr>
+        <tr><td class="reg">—</td><td class="reg">.lcomm nombre, N</td><td class="dim">N bytes</td><td>Forma "GAS nativa" de reservar N bytes en .bss (equivalente directo a resb, más idiomático que .skip).</td><td class="reg dim">.lcomm buffer, 101<br><span class="tag">dentro de .section .bss, sin etiqueta "nombre:" aparte — el nombre va como argumento</span></td></tr>
+        <tr><td class="reg">—</td><td class="reg">.ascii "texto"</td><td class="dim">string</td><td>String SIN null terminator automático (como db "texto" en NASM).</td><td class="reg dim">etiqueta:<br>&nbsp;&nbsp;.ascii "texto"<br><span class="tag">dentro de .section .data</span></td></tr>
+        <tr><td class="reg">—</td><td class="reg">.asciz "texto"</td><td class="dim">string + \0</td><td>String CON null terminator automático al final (útil si vas a usar funciones estilo C que esperan '\0').</td><td class="reg dim">etiqueta:<br>&nbsp;&nbsp;.asciz "texto"<br><span class="tag">dentro de .section .data</span></td></tr>
+        <tr><td class="reg">times N db X</td><td class="reg">.fill N, 1, X</td><td class="dim">N bytes</td><td>Repite un valor N veces (ej: rellenar con ceros, padding).</td><td class="reg dim">times 10 db 0<br><span class="tag">dentro de section .data (o .bss si X se omite)</span></td></tr>
+        <tr><td class="reg">equ</td><td class="reg">.equ / =</td><td class="dim">0 bytes</td><td>Constante en tiempo de ensamblado — sustitución de texto, no ocupa memoria.</td><td class="reg dim">nombre equ valor<br><span class="tag">en cualquier sección, antes de usarlo — típico arriba del archivo</span></td></tr>
+        <tr><td class="reg">$</td><td class="reg">.</td><td class="dim">—</td><td>"Dirección actual" — usado para calcular longitudes: <span class="cm">len equ $-msg</span></td><td class="reg dim">len equ $ - etiqueta<br><span class="tag">justo debajo del dato cuya longitud querés medir</span></td></tr>
+        <tr><td class="reg">.align N</td><td class="reg">.align N / .balign N</td><td class="dim">—</td><td>Alinea la siguiente dirección a un múltiplo de N (rendimiento de acceso a memoria).</td><td class="reg dim">.align 4<br><span class="tag">justo antes de la etiqueta que necesita quedar alineada</span></td></tr>
       </table>
     </div>
   </section>
@@ -105,15 +105,15 @@
     <div class="sec-title">Directivas estructurales / de ensamblado</div>
     <div class="card">
       <table>
-        <tr><th>NASM</th><th>GAS</th><th>Qué hace</th></tr>
-        <tr><td class="reg">section .data / .bss / .text</td><td class="reg">.section .data / .bss / .text</td><td>Cambia a qué región de memoria van las líneas siguientes.</td></tr>
-        <tr><td class="reg">global etiqueta</td><td class="reg">.global etiqueta / .globl etiqueta</td><td>Hace visible una etiqueta para el linker (típicamente <span class="cm">_start</span>).</td></tr>
-        <tr><td class="reg">extern etiqueta</td><td class="reg">.extern etiqueta</td><td>Declara que una etiqueta está definida en OTRO archivo (para linkear varios .o juntos).</td></tr>
-        <tr><td class="reg">%define NOMBRE valor</td><td class="reg">.equ NOMBRE, valor</td><td>Constante simbólica — sustitución de texto en tiempo de ensamblado.</td></tr>
-        <tr><td class="reg">%macro nombre N ... %endmacro</td><td class="reg">.macro nombre arg1,arg2 ... .endm</td><td>Define una macro: bloque de instrucciones reutilizable con parámetros, expandido inline al ensamblar (no es una función — no hay call/ret, es copy-paste).</td></tr>
-        <tr><td class="reg">%include "archivo.inc"</td><td class="reg">.include "archivo.s"</td><td>Inserta el contenido de otro archivo fuente antes de ensamblar.</td></tr>
-        <tr><td class="reg">bits 64 / bits 32</td><td class="reg">(se define por el flag del ensamblador)</td><td>Le dice al ensamblador si generar código de 64 o 32 bits.</td></tr>
-        <tr><td class="reg">; comentario</td><td class="reg">@ comentario &nbsp;<span class="tag">o # / //</span></td><td>Todo lo que sigue en la línea se ignora al ensamblar.</td></tr>
+        <tr><th>NASM</th><th>GAS</th><th>Qué hace</th><th>Plantilla / dónde va</th></tr>
+        <tr><td class="reg">section .data / .bss / .text</td><td class="reg">.section .data / .bss / .text</td><td>Cambia a qué región de memoria van las líneas siguientes.</td><td class="reg dim">section .text<br><span class="tag">al inicio del bloque; todo lo que sigue pertenece a esa sección hasta la próxima "section"</span></td></tr>
+        <tr><td class="reg">global etiqueta</td><td class="reg">.global etiqueta / .globl etiqueta</td><td>Hace visible una etiqueta para el linker (típicamente <span class="cm">_start</span>).</td><td class="reg dim">global _start<br><span class="tag">una sola vez, cerca del inicio de section .text, antes de _start:</span></td></tr>
+        <tr><td class="reg">extern etiqueta</td><td class="reg">.extern etiqueta</td><td>Declara que una etiqueta está definida en OTRO archivo (para linkear varios .o juntos).</td><td class="reg dim">extern printf<br><span class="tag">al inicio del archivo, antes de section .text</span></td></tr>
+        <tr><td class="reg">%define NOMBRE valor</td><td class="reg">.equ NOMBRE, valor</td><td>Constante simbólica — sustitución de texto en tiempo de ensamblado.</td><td class="reg dim">%define MAXLEN 100<br><span class="tag">al inicio del archivo, antes de su primer uso</span></td></tr>
+        <tr><td class="reg">%macro nombre N ... %endmacro</td><td class="reg">.macro nombre arg1,arg2 ... .endm</td><td>Define una macro: bloque de instrucciones reutilizable con parámetros, expandido inline al ensamblar (no es una función — no hay call/ret, es copy-paste).</td><td class="reg dim">%macro imprimir 2<br>&nbsp;&nbsp;...cuerpo...<br>%endmacro<br><span class="tag">antes de section .text; se invoca luego como: imprimir msg, len</span></td></tr>
+        <tr><td class="reg">%include "archivo.inc"</td><td class="reg">.include "archivo.s"</td><td>Inserta el contenido de otro archivo fuente antes de ensamblar.</td><td class="reg dim">%include "macros.inc"<br><span class="tag">primera línea del archivo, antes de cualquier section</span></td></tr>
+        <tr><td class="reg">bits 64 / bits 32</td><td class="reg">(se define por el flag del ensamblador)</td><td>Le dice al ensamblador si generar código de 64 o 32 bits.</td><td class="reg dim">bits 64<br><span class="tag">primerísima línea del archivo</span></td></tr>
+        <tr><td class="reg">; comentario</td><td class="reg">@ comentario &nbsp;<span class="tag">o # / //</span></td><td>Todo lo que sigue en la línea se ignora al ensamblar.</td><td class="reg dim">mov rax, 1 ; nota<br><span class="tag">al final de cualquier línea, o sola en su propia línea</span></td></tr>
       </table>
     </div>
   </section>
@@ -123,16 +123,16 @@
     <div class="sec-title">Movimiento de datos</div>
     <div class="card">
       <table>
-        <tr><th>NASM (x86-64)</th><th>GAS (ARM AA32)</th><th>Qué hace</th></tr>
-        <tr><td class="reg">mov dst, src</td><td class="reg">mov dst, src / mov dst, #imm</td><td>Copia un valor (registro, memoria o inmediato) al destino. En ARM, el ORIGEN memoria NO es válido — para eso están ldr/str.</td></tr>
-        <tr><td class="reg">mov reg, [mem]</td><td class="reg">ldr reg, [dir] / ldrb (byte) / ldrh (16 bits)</td><td>Carga (load) un valor DESDE memoria a un registro. ARM obliga a separar esto de mov (arquitectura load-store).</td></tr>
-        <tr><td class="reg">mov [mem], reg</td><td class="reg">str reg, [dir] / strb (byte) / strh (16 bits)</td><td>Guarda (store) un registro EN memoria. Mismo motivo — nunca se opera memoria directo en ARM.</td></tr>
-        <tr><td class="reg">movzx dst, src</td><td class="reg">ldrb / ldrh (ya hacen zero-extend solos)</td><td>Carga un valor MÁS chico (byte/word) a un registro más grande, rellenando con CEROS los bits extra.</td></tr>
-        <tr><td class="reg">movsx dst, src</td><td class="reg">ldrsb / ldrsh</td><td>Igual que movzx pero rellena con el BIT DE SIGNO (para números negativos con signo).</td></tr>
-        <tr><td class="reg">lea dst, [expr]</td><td class="reg">ldr dst, =etiqueta / add dst, base, #offset</td><td>Carga la DIRECCIÓN calculada (no el contenido) — "load effective address". Muy usado para calcular direcciones sin acceder a memoria.</td></tr>
-        <tr><td class="reg">push reg</td><td class="reg">push {reg} <span class="tag">o stmfd sp!, {...}</span></td><td>Apila un valor: decrementa el stack pointer y guarda el registro en la pila.</td></tr>
-        <tr><td class="reg">pop reg</td><td class="reg">pop {reg} <span class="tag">o ldmfd sp!, {...}</span></td><td>Desapila: lee el tope de la pila al registro e incrementa el stack pointer.</td></tr>
-        <tr><td class="reg">xchg a, b</td><td class="reg">(no existe directo — se hace con un registro temporal)</td><td>Intercambia el valor de dos operandos entre sí.</td></tr>
+        <tr><th>NASM (x86-64)</th><th>GAS (ARM AA32)</th><th>Qué hace</th><th>Plantilla / dónde va</th></tr>
+        <tr><td class="reg">mov dst, src</td><td class="reg">mov dst, src / mov dst, #imm</td><td>Copia un valor (registro, memoria o inmediato) al destino. En ARM, el ORIGEN memoria NO es válido — para eso están ldr/str.</td><td class="reg dim">mov rax, 5<br><span class="tag">dentro de section .text, en cualquier punto del flujo</span></td></tr>
+        <tr><td class="reg">mov reg, [mem]</td><td class="reg">ldr reg, [dir] / ldrb (byte) / ldrh (16 bits)</td><td>Carga (load) un valor DESDE memoria a un registro. ARM obliga a separar esto de mov (arquitectura load-store).</td><td class="reg dim">ldr r0, [r1]<br><span class="tag">section .text; r1 ya debe tener una dirección cargada antes</span></td></tr>
+        <tr><td class="reg">mov [mem], reg</td><td class="reg">str reg, [dir] / strb (byte) / strh (16 bits)</td><td>Guarda (store) un registro EN memoria. Mismo motivo — nunca se opera memoria directo en ARM.</td><td class="reg dim">str r0, [r1]<br><span class="tag">section .text; después de tener el valor listo en r0</span></td></tr>
+        <tr><td class="reg">movzx dst, src</td><td class="reg">ldrb / ldrh (ya hacen zero-extend solos)</td><td>Carga un valor MÁS chico (byte/word) a un registro más grande, rellenando con CEROS los bits extra.</td><td class="reg dim">movzx eax, byte [buffer+rbx]<br><span class="tag">section .text, típico dentro de un loop que recorre un buffer</span></td></tr>
+        <tr><td class="reg">movsx dst, src</td><td class="reg">ldrsb / ldrsh</td><td>Igual que movzx pero rellena con el BIT DE SIGNO (para números negativos con signo).</td><td class="reg dim">movsx eax, byte [valor]<br><span class="tag">section .text, cuando el dato es un número con signo más chico que el registro</span></td></tr>
+        <tr><td class="reg">lea dst, [expr]</td><td class="reg">ldr dst, =etiqueta / add dst, base, #offset</td><td>Carga la DIRECCIÓN calculada (no el contenido) — "load effective address". Muy usado para calcular direcciones sin acceder a memoria.</td><td class="reg dim">lea rsi, [buffer]<br><span class="tag">section .text, antes de usar rsi como puntero (ej. para pasarlo a un syscall)</span></td></tr>
+        <tr><td class="reg">push reg</td><td class="reg">push {reg} <span class="tag">o stmfd sp!, {...}</span></td><td>Apila un valor: decrementa el stack pointer y guarda el registro en la pila.</td><td class="reg dim">push rax<br><span class="tag">section .text, antes de una llamada que pueda pisar ese registro</span></td></tr>
+        <tr><td class="reg">pop reg</td><td class="reg">pop {reg} <span class="tag">o ldmfd sp!, {...}</span></td><td>Desapila: lee el tope de la pila al registro e incrementa el stack pointer.</td><td class="reg dim">pop rax<br><span class="tag">section .text, en el mismo orden inverso al push correspondiente</span></td></tr>
+        <tr><td class="reg">xchg a, b</td><td class="reg">(no existe directo — se hace con un registro temporal)</td><td>Intercambia el valor de dos operandos entre sí.</td><td class="reg dim">xchg rax, rbx<br><span class="tag">section .text</span></td></tr>
       </table>
     </div>
   </section>
@@ -142,17 +142,17 @@
     <div class="sec-title">Aritmética</div>
     <div class="card">
       <table>
-        <tr><th>NASM (x86-64)</th><th>GAS (ARM AA32)</th><th>Qué hace</th></tr>
-        <tr><td class="reg">add dst, src</td><td class="reg">add dst, src1, src2</td><td>Suma. x86: dst = dst+src (destructivo). ARM: dst = src1+src2 (no destructivo).</td></tr>
-        <tr><td class="reg">sub dst, src</td><td class="reg">sub dst, src1, src2</td><td>Resta: dst = dst−src (x86) o dst = src1−src2 (ARM).</td></tr>
-        <tr><td class="reg">—</td><td class="reg">rsb dst, src1, src2</td><td>"Reverse subtract" — dst = src2−src1 (invertido; útil porque el 2do operando en ARM puede llevar shifts, el 1ro no).</td></tr>
-        <tr><td class="reg">inc reg</td><td class="reg">add reg, reg, #1</td><td>Incrementa en 1 (ARM no tiene inc/dec dedicados, se hace con add/sub #1).</td></tr>
-        <tr><td class="reg">dec reg</td><td class="reg">sub reg, reg, #1</td><td>Decrementa en 1.</td></tr>
-        <tr><td class="reg">neg reg</td><td class="reg">rsb reg, reg, #0</td><td>Cambia el signo (complemento a 2): reg = −reg.</td></tr>
-        <tr><td class="reg">mul src <span class="tag">unsigned</span></td><td class="reg">mul dst, src1, src2</td><td>Multiplicación sin signo. x86: rax = rax*src (resultado en rdx:rax). ARM: dst = src1*src2, de 3 operandos.</td></tr>
-        <tr><td class="reg">imul src/dst,src</td><td class="reg">mul (ARM no distingue con/sin signo en mul de 32b)</td><td>Multiplicación con signo.</td></tr>
-        <tr><td class="reg">div src <span class="tag">unsigned</span></td><td class="reg">udiv dst, src1, src2</td><td>División sin signo. x86: divide rdx:rax entre src, cociente en rax, resto en rdx.</td></tr>
-        <tr><td class="reg">idiv src</td><td class="reg">sdiv dst, src1, src2</td><td>División con signo.</td></tr>
+        <tr><th>NASM (x86-64)</th><th>GAS (ARM AA32)</th><th>Qué hace</th><th>Plantilla / dónde va</th></tr>
+        <tr><td class="reg">add dst, src</td><td class="reg">add dst, src1, src2</td><td>Suma. x86: dst = dst+src (destructivo). ARM: dst = src1+src2 (no destructivo).</td><td class="reg dim">add rax, 1 &nbsp;/&nbsp; add r0, r1, r2<br><span class="tag">section .text</span></td></tr>
+        <tr><td class="reg">sub dst, src</td><td class="reg">sub dst, src1, src2</td><td>Resta: dst = dst−src (x86) o dst = src1−src2 (ARM).</td><td class="reg dim">sub rax, 1 &nbsp;/&nbsp; sub r0, r1, r2<br><span class="tag">section .text</span></td></tr>
+        <tr><td class="reg">—</td><td class="reg">rsb dst, src1, src2</td><td>"Reverse subtract" — dst = src2−src1 (invertido; útil porque el 2do operando en ARM puede llevar shifts, el 1ro no).</td><td class="reg dim">rsb r0, r1, #100<br><span class="tag">section .text</span></td></tr>
+        <tr><td class="reg">inc reg</td><td class="reg">add reg, reg, #1</td><td>Incrementa en 1 (ARM no tiene inc/dec dedicados, se hace con add/sub #1).</td><td class="reg dim">inc rbx &nbsp;/&nbsp; add r5, r5, #1<br><span class="tag">section .text, típico al final de un loop</span></td></tr>
+        <tr><td class="reg">dec reg</td><td class="reg">sub reg, reg, #1</td><td>Decrementa en 1.</td><td class="reg dim">dec rbx &nbsp;/&nbsp; sub r5, r5, #1<br><span class="tag">section .text</span></td></tr>
+        <tr><td class="reg">neg reg</td><td class="reg">rsb reg, reg, #0</td><td>Cambia el signo (complemento a 2): reg = −reg.</td><td class="reg dim">neg rax &nbsp;/&nbsp; rsb r0, r0, #0<br><span class="tag">section .text</span></td></tr>
+        <tr><td class="reg">mul src <span class="tag">unsigned</span></td><td class="reg">mul dst, src1, src2</td><td>Multiplicación sin signo. x86: rax = rax*src (resultado en rdx:rax). ARM: dst = src1*src2, de 3 operandos.</td><td class="reg dim">mul rbx &nbsp;/&nbsp; mul r0, r1, r2<br><span class="tag">section .text; en x86 rax debe tener uno de los factores antes</span></td></tr>
+        <tr><td class="reg">imul src/dst,src</td><td class="reg">mul (ARM no distingue con/sin signo en mul de 32b)</td><td>Multiplicación con signo.</td><td class="reg dim">imul rax, rbx<br><span class="tag">section .text</span></td></tr>
+        <tr><td class="reg">div src <span class="tag">unsigned</span></td><td class="reg">udiv dst, src1, src2</td><td>División sin signo. x86: divide rdx:rax entre src, cociente en rax, resto en rdx.</td><td class="reg dim">xor rdx,rdx / div rbx<br><span class="tag">section .text; hay que limpiar rdx antes en x86</span></td></tr>
+        <tr><td class="reg">idiv src</td><td class="reg">sdiv dst, src1, src2</td><td>División con signo.</td><td class="reg dim">idiv rbx &nbsp;/&nbsp; sdiv r0, r1, r2<br><span class="tag">section .text</span></td></tr>
       </table>
     </div>
   </section>
@@ -162,16 +162,16 @@
     <div class="sec-title">Lógica y manipulación de bits</div>
     <div class="card">
       <table>
-        <tr><th>NASM (x86-64)</th><th>GAS (ARM AA32)</th><th>Qué hace</th></tr>
-        <tr><td class="reg">and dst, src</td><td class="reg">and dst, src1, src2</td><td>AND bit a bit. Útil para "apagar" bits específicos (máscaras).</td></tr>
-        <tr><td class="reg">or dst, src</td><td class="reg">orr dst, src1, src2</td><td>OR bit a bit. Útil para "prender" bits específicos.</td></tr>
-        <tr><td class="reg">xor dst, src</td><td class="reg">eor dst, src1, src2</td><td>XOR bit a bit. Invierte (toggle) los bits marcados con 1 en el operando. También: xor reg,reg = poner el registro en 0 rápido.</td></tr>
-        <tr><td class="reg">not reg</td><td class="reg">mvn dst, src</td><td>Invierte TODOS los bits (complemento a 1). mvn = "move NOT".</td></tr>
-        <tr><td class="reg">shl dst, N <span class="tag">o sal</span></td><td class="reg">lsl dst, src, #N</td><td>Shift lógico a la IZQUIERDA: multiplica por 2^N, rellena con ceros por la derecha.</td></tr>
-        <tr><td class="reg">shr dst, N</td><td class="reg">lsr dst, src, #N</td><td>Shift lógico a la DERECHA: divide por 2^N sin signo, rellena con ceros por la izquierda.</td></tr>
-        <tr><td class="reg">sar dst, N</td><td class="reg">asr dst, src, #N</td><td>Shift ARITMÉTICO a la derecha: divide por 2^N CON signo — rellena con el bit de signo, no con cero (preserva negativos).</td></tr>
-        <tr><td class="reg">rol dst, N</td><td class="reg">(no directo — se compone con lsl+orr)</td><td>Rota bits a la izquierda — los que "se salen" por arriba reentran por abajo.</td></tr>
-        <tr><td class="reg">ror dst, N</td><td class="reg">ror dst, src, #N</td><td>Rota bits a la derecha — los que se salen por abajo reentran por arriba.</td></tr>
+        <tr><th>NASM (x86-64)</th><th>GAS (ARM AA32)</th><th>Qué hace</th><th>Plantilla / dónde va</th></tr>
+        <tr><td class="reg">and dst, src</td><td class="reg">and dst, src1, src2</td><td>AND bit a bit. Útil para "apagar" bits específicos (máscaras).</td><td class="reg dim">and al, 0x0F<br><span class="tag">section .text</span></td></tr>
+        <tr><td class="reg">or dst, src</td><td class="reg">orr dst, src1, src2</td><td>OR bit a bit. Útil para "prender" bits específicos.</td><td class="reg dim">or al, 0x20<br><span class="tag">section .text</span></td></tr>
+        <tr><td class="reg">xor dst, src</td><td class="reg">eor dst, src1, src2</td><td>XOR bit a bit. Invierte (toggle) los bits marcados con 1 en el operando. También: xor reg,reg = poner el registro en 0 rápido.</td><td class="reg dim">xor al, 0x20 &nbsp;/&nbsp; eor r0, r0, #0x20<br><span class="tag">section .text — para toggle de case, dentro del loop de conversión</span></td></tr>
+        <tr><td class="reg">not reg</td><td class="reg">mvn dst, src</td><td>Invierte TODOS los bits (complemento a 1). mvn = "move NOT".</td><td class="reg dim">not al &nbsp;/&nbsp; mvn r0, r1<br><span class="tag">section .text</span></td></tr>
+        <tr><td class="reg">shl dst, N <span class="tag">o sal</span></td><td class="reg">lsl dst, src, #N</td><td>Shift lógico a la IZQUIERDA: multiplica por 2^N, rellena con ceros por la derecha.</td><td class="reg dim">shl rax, 2 &nbsp;/&nbsp; lsl r0, r1, #2<br><span class="tag">section .text</span></td></tr>
+        <tr><td class="reg">shr dst, N</td><td class="reg">lsr dst, src, #N</td><td>Shift lógico a la DERECHA: divide por 2^N sin signo, rellena con ceros por la izquierda.</td><td class="reg dim">shr rax, 2 &nbsp;/&nbsp; lsr r0, r1, #2<br><span class="tag">section .text</span></td></tr>
+        <tr><td class="reg">sar dst, N</td><td class="reg">asr dst, src, #N</td><td>Shift ARITMÉTICO a la derecha: divide por 2^N CON signo — rellena con el bit de signo, no con cero (preserva negativos).</td><td class="reg dim">sar rax, 2 &nbsp;/&nbsp; asr r0, r1, #2<br><span class="tag">section .text, cuando el valor puede ser negativo</span></td></tr>
+        <tr><td class="reg">rol dst, N</td><td class="reg">(no directo — se compone con lsl+orr)</td><td>Rota bits a la izquierda — los que "se salen" por arriba reentran por abajo.</td><td class="reg dim">rol al, 3<br><span class="tag">section .text</span></td></tr>
+        <tr><td class="reg">ror dst, N</td><td class="reg">ror dst, src, #N</td><td>Rota bits a la derecha — los que se salen por abajo reentran por arriba.</td><td class="reg dim">ror al, 3 &nbsp;/&nbsp; ror r0, r1, #3<br><span class="tag">section .text</span></td></tr>
       </table>
     </div>
   </section>
@@ -181,11 +181,11 @@
     <div class="sec-title">Comparación</div>
     <div class="card">
       <table>
-        <tr><th>NASM (x86-64)</th><th>GAS (ARM AA32)</th><th>Qué hace</th></tr>
-        <tr><td class="reg">cmp a, b</td><td class="reg">cmp a, b</td><td>Calcula a−b internamente y actualiza flags, SIN guardar el resultado en ningún lado. Base de todo salto condicional.</td></tr>
-        <tr><td class="reg">test a, b</td><td class="reg">tst a, b</td><td>Calcula a AND b internamente (sin guardar), solo para ver si el resultado da cero — típico para "¿está prendido este bit?".</td></tr>
-        <tr><td class="reg">—</td><td class="reg">cmn a, b</td><td>"Compare negative" — calcula a+b internamente, actualiza flags (equivalente a comparar contra un negativo).</td></tr>
-        <tr><td class="reg">—</td><td class="reg">teq a, b</td><td>Calcula a XOR b internamente — útil para ver si dos valores son EXACTAMENTE iguales, ignorando el flag de overflow.</td></tr>
+        <tr><th>NASM (x86-64)</th><th>GAS (ARM AA32)</th><th>Qué hace</th><th>Plantilla / dónde va</th></tr>
+        <tr><td class="reg">cmp a, b</td><td class="reg">cmp a, b</td><td>Calcula a−b internamente y actualiza flags, SIN guardar el resultado en ningún lado. Base de todo salto condicional.</td><td class="reg dim">cmp al, 0x41<br><span class="tag">section .text, SIEMPRE justo antes del salto condicional que depende de él</span></td></tr>
+        <tr><td class="reg">test a, b</td><td class="reg">tst a, b</td><td>Calcula a AND b internamente (sin guardar), solo para ver si el resultado da cero — típico para "¿está prendido este bit?".</td><td class="reg dim">test al, al<br><span class="tag">section .text, justo antes de un je/jz (¿es cero?)</span></td></tr>
+        <tr><td class="reg">—</td><td class="reg">cmn a, b</td><td>"Compare negative" — calcula a+b internamente, actualiza flags (equivalente a comparar contra un negativo).</td><td class="reg dim">cmn r0, #5<br><span class="tag">section .text, antes del salto que dependa de esto</span></td></tr>
+        <tr><td class="reg">—</td><td class="reg">teq a, b</td><td>Calcula a XOR b internamente — útil para ver si dos valores son EXACTAMENTE iguales, ignorando el flag de overflow.</td><td class="reg dim">teq r0, r1<br><span class="tag">section .text, antes de un beq</span></td></tr>
       </table>
     </div>
   </section>
@@ -197,41 +197,41 @@
       <div class="card">
         <div class="colhead">NASM (x86-64)</div>
         <table>
-          <tr><th>Instrucción</th><th>Salta si...</th></tr>
-          <tr><td class="reg">jmp</td><td>siempre (incondicional)</td></tr>
-          <tr><td class="reg">je / jz</td><td>igual / resultado cero</td></tr>
-          <tr><td class="reg">jne / jnz</td><td>distinto / resultado no-cero</td></tr>
-          <tr><td class="reg">jl / jnge</td><td>menor <span class="tag">con signo</span></td></tr>
-          <tr><td class="reg">jg / jnle</td><td>mayor <span class="tag">con signo</span></td></tr>
-          <tr><td class="reg">jle / jng</td><td>menor o igual <span class="tag">con signo</span></td></tr>
-          <tr><td class="reg">jge / jnl</td><td>mayor o igual <span class="tag">con signo</span></td></tr>
-          <tr><td class="reg">jb / jc / jnae</td><td>menor <span class="tag">sin signo</span></td></tr>
-          <tr><td class="reg">ja / jnbe</td><td>mayor <span class="tag">sin signo</span></td></tr>
-          <tr><td class="reg">jbe / jna</td><td>menor o igual <span class="tag">sin signo</span></td></tr>
-          <tr><td class="reg">jae / jnb / jnc</td><td>mayor o igual <span class="tag">sin signo</span></td></tr>
-          <tr><td class="reg">call etiqueta</td><td>siempre, guardando la dirección de retorno en la pila</td></tr>
-          <tr><td class="reg">ret</td><td>vuelve a la dirección guardada por el último call</td></tr>
-          <tr><td class="reg">loop etiqueta</td><td>decrementa rcx y salta si rcx != 0 (loop "clásico")</td></tr>
+          <tr><th>Instrucción</th><th>Salta si...</th><th>Plantilla</th></tr>
+          <tr><td class="reg">jmp</td><td>siempre (incondicional)</td><td class="reg dim">jmp .etiqueta</td></tr>
+          <tr><td class="reg">je / jz</td><td>igual / resultado cero</td><td class="reg dim">cmp al,'a'<br>je .etiqueta</td></tr>
+          <tr><td class="reg">jne / jnz</td><td>distinto / resultado no-cero</td><td class="reg dim">cmp al,'a'<br>jne .etiqueta</td></tr>
+          <tr><td class="reg">jl / jnge</td><td>menor <span class="tag">con signo</span></td><td class="reg dim">cmp al,LO<br>jl .etiqueta</td></tr>
+          <tr><td class="reg">jg / jnle</td><td>mayor <span class="tag">con signo</span></td><td class="reg dim">cmp al,HI<br>jg .etiqueta</td></tr>
+          <tr><td class="reg">jle / jng</td><td>menor o igual <span class="tag">con signo</span></td><td class="reg dim">cmp al,HI<br>jle .etiqueta</td></tr>
+          <tr><td class="reg">jge / jnl</td><td>mayor o igual <span class="tag">con signo</span></td><td class="reg dim">cmp al,LO<br>jge .etiqueta</td></tr>
+          <tr><td class="reg">jb / jc / jnae</td><td>menor <span class="tag">sin signo</span></td><td class="reg dim">cmp rbx,rcx<br>jb .etiqueta</td></tr>
+          <tr><td class="reg">ja / jnbe</td><td>mayor <span class="tag">sin signo</span></td><td class="reg dim">cmp rbx,rcx<br>ja .etiqueta</td></tr>
+          <tr><td class="reg">jbe / jna</td><td>menor o igual <span class="tag">sin signo</span></td><td class="reg dim">cmp rbx,rcx<br>jbe .etiqueta</td></tr>
+          <tr><td class="reg">jae / jnb / jnc</td><td>mayor o igual <span class="tag">sin signo</span></td><td class="reg dim">cmp rbx,rcx<br>jae .etiqueta</td></tr>
+          <tr><td class="reg">call etiqueta</td><td>siempre, guardando la dirección de retorno en la pila</td><td class="reg dim">call mi_funcion<br><span class="tag">requiere un "ret" al final de mi_funcion</span></td></tr>
+          <tr><td class="reg">ret</td><td>vuelve a la dirección guardada por el último call</td><td class="reg dim">ret<br><span class="tag">última línea de una función llamada con call</span></td></tr>
+          <tr><td class="reg">loop etiqueta</td><td>decrementa rcx y salta si rcx != 0 (loop "clásico")</td><td class="reg dim">mov rcx, 10<br>.etiqueta:<br>&nbsp;&nbsp;...<br>&nbsp;&nbsp;loop .etiqueta</td></tr>
         </table>
       </div>
       <div class="card">
         <div class="colhead">GAS (ARM AA32)</div>
         <table>
-          <tr><th>Instrucción</th><th>Salta si...</th></tr>
-          <tr><td class="reg">b etiqueta</td><td>siempre (incondicional)</td></tr>
-          <tr><td class="reg">beq</td><td>igual / Z=1</td></tr>
-          <tr><td class="reg">bne</td><td>distinto / Z=0</td></tr>
-          <tr><td class="reg">blt</td><td>menor <span class="tag">con signo</span></td></tr>
-          <tr><td class="reg">bgt</td><td>mayor <span class="tag">con signo</span></td></tr>
-          <tr><td class="reg">ble</td><td>menor o igual <span class="tag">con signo</span></td></tr>
-          <tr><td class="reg">bge</td><td>mayor o igual <span class="tag">con signo</span></td></tr>
-          <tr><td class="reg">blo / bcc</td><td>menor <span class="tag">sin signo</span></td></tr>
-          <tr><td class="reg">bhi</td><td>mayor <span class="tag">sin signo</span></td></tr>
-          <tr><td class="reg">bls</td><td>menor o igual <span class="tag">sin signo</span></td></tr>
-          <tr><td class="reg">bhs / bcs</td><td>mayor o igual <span class="tag">sin signo</span></td></tr>
-          <tr><td class="reg">bl etiqueta</td><td>siempre, guardando dirección de retorno en LR (link register)</td></tr>
-          <tr><td class="reg">bx lr</td><td>vuelve a la dirección guardada en LR (equivalente a ret)</td></tr>
-          <tr><td class="reg">cualquier instr. + sufijo</td><td>CUALQUIER instrucción admite estos sufijos pegados (ej: addeqs) — no solo los branches</td></tr>
+          <tr><th>Instrucción</th><th>Salta si...</th><th>Plantilla</th></tr>
+          <tr><td class="reg">b etiqueta</td><td>siempre (incondicional)</td><td class="reg dim">b .etiqueta</td></tr>
+          <tr><td class="reg">beq</td><td>igual / Z=1</td><td class="reg dim">cmp r0,#'a'<br>beq .etiqueta</td></tr>
+          <tr><td class="reg">bne</td><td>distinto / Z=0</td><td class="reg dim">cmp r0,#'a'<br>bne .etiqueta</td></tr>
+          <tr><td class="reg">blt</td><td>menor <span class="tag">con signo</span></td><td class="reg dim">cmp r0,#LO<br>blt .etiqueta</td></tr>
+          <tr><td class="reg">bgt</td><td>mayor <span class="tag">con signo</span></td><td class="reg dim">cmp r0,#HI<br>bgt .etiqueta</td></tr>
+          <tr><td class="reg">ble</td><td>menor o igual <span class="tag">con signo</span></td><td class="reg dim">cmp r0,#HI<br>ble .etiqueta</td></tr>
+          <tr><td class="reg">bge</td><td>mayor o igual <span class="tag">con signo</span></td><td class="reg dim">cmp r0,#LO<br>bge .etiqueta</td></tr>
+          <tr><td class="reg">blo / bcc</td><td>menor <span class="tag">sin signo</span></td><td class="reg dim">cmp r5,r4<br>blo .etiqueta</td></tr>
+          <tr><td class="reg">bhi</td><td>mayor <span class="tag">sin signo</span></td><td class="reg dim">cmp r5,r4<br>bhi .etiqueta</td></tr>
+          <tr><td class="reg">bls</td><td>menor o igual <span class="tag">sin signo</span></td><td class="reg dim">cmp r5,r4<br>bls .etiqueta</td></tr>
+          <tr><td class="reg">bhs / bcs</td><td>mayor o igual <span class="tag">sin signo</span></td><td class="reg dim">cmp r5,r4<br>bhs .etiqueta</td></tr>
+          <tr><td class="reg">bl etiqueta</td><td>siempre, guardando dirección de retorno en LR (link register)</td><td class="reg dim">bl mi_funcion<br><span class="tag">requiere "bx lr" al final de mi_funcion</span></td></tr>
+          <tr><td class="reg">bx lr</td><td>vuelve a la dirección guardada en LR (equivalente a ret)</td><td class="reg dim">bx lr<br><span class="tag">última línea de una función llamada con bl</span></td></tr>
+          <tr><td class="reg">cualquier instr. + sufijo</td><td>CUALQUIER instrucción admite estos sufijos pegados (ej: addeqs) — no solo los branches</td><td class="reg dim">cmp r0,r4<br>addeqs r1,r2,r3<br><span class="tag">section .text, pegado sin espacio al mnemónico base</span></td></tr>
         </table>
       </div>
     </div>
@@ -242,11 +242,11 @@
     <div class="sec-title">Llamadas al sistema y control de flujo</div>
     <div class="card">
       <table>
-        <tr><th>NASM (x86-64)</th><th>GAS (ARM AA32)</th><th>Qué hace</th></tr>
-        <tr><td class="reg">syscall</td><td class="reg">svc 0</td><td>Cede el control al kernel para ejecutar la syscall cuyo número está en rax/r7.</td></tr>
-        <tr><td class="reg">int 0x80 <span class="tag">x86 32-bit clásico</span></td><td class="reg">(svc 0 es el equivalente moderno de ARM)</td><td>Forma antigua de invocar syscalls en x86 de 32 bits vía interrupción software.</td></tr>
-        <tr><td class="reg">nop</td><td class="reg">nop</td><td>No hace nada — ocupa un ciclo/espacio, usado para alineación o padding.</td></tr>
-        <tr><td class="reg">hlt</td><td class="reg">(no aplica en espacio de usuario)</td><td>Detiene el CPU (solo válido en modo kernel/privilegiado).</td></tr>
+        <tr><th>NASM (x86-64)</th><th>GAS (ARM AA32)</th><th>Qué hace</th><th>Plantilla / dónde va</th></tr>
+        <tr><td class="reg">syscall</td><td class="reg">svc 0</td><td>Cede el control al kernel para ejecutar la syscall cuyo número está en rax/r7.</td><td class="reg dim">mov rax,1<br>mov rdi,1<br>...<br>syscall<br><span class="tag">section .text, con TODOS los argumentos ya cargados en los registros correctos antes</span></td></tr>
+        <tr><td class="reg">int 0x80 <span class="tag">x86 32-bit clásico</span></td><td class="reg">(svc 0 es el equivalente moderno de ARM)</td><td>Forma antigua de invocar syscalls en x86 de 32 bits vía interrupción software.</td><td class="reg dim">int 0x80<br><span class="tag">solo en código de 32 bits legacy</span></td></tr>
+        <tr><td class="reg">nop</td><td class="reg">nop</td><td>No hace nada — ocupa un ciclo/espacio, usado para alineación o padding.</td><td class="reg dim">nop<br><span class="tag">en cualquier punto de section .text</span></td></tr>
+        <tr><td class="reg">hlt</td><td class="reg">(no aplica en espacio de usuario)</td><td>Detiene el CPU (solo válido en modo kernel/privilegiado).</td><td class="reg dim">hlt<br><span class="tag">no usar en programas normales — causa error de permisos</span></td></tr>
       </table>
     </div>
   </section>
