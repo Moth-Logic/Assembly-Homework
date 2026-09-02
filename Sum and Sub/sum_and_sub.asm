@@ -17,19 +17,48 @@ section .bss
 
 section .text
     global _start
-_start:
+
+lee_numero:
     mov rax, 1
     mov rdi, 1
-    mov rsi, r10
-    mov rdx, 22
+    mov rsi, r8
+    mov rdx, r9
     syscall
 
     mov rax, 0
     mov rdi, 0
-    mov rsi, buffer
-    mov rdx, 101
+    mov rsi, r10
+    mov rdx, 22
     syscall
 
-    mov rax, 60
-    xor rdi, rdi
-    syscall
+    mov rcx, rax
+    dec rcx
+
+    xor rbx, rcx
+    xor rax, rax
+
+.parse_loop:
+    cmp rbx, rcx
+    jge .parse_valido
+
+    movzx r13d, byte [r10 + rbx]
+
+    cmp r13b, '0'
+    jl .parse_invalido
+    cmp r13b, '9'
+    jg .parse_invalido
+
+    imul rax, rax, 10
+    sub r13b, '0'
+    add rax, r13
+
+    inc rbx
+    jmp .parse_loop
+
+.parse_valido:
+    mov r15b, 0
+    ret
+
+.parse_invalido:
+    mov r15b, 1
+    ret 
