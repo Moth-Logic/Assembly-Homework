@@ -69,6 +69,7 @@ imprime_numero:
     jge .es_positivo
     mov r14, 1
     neg rax
+
 .es_positivo:
     lea rdi, [r10 + 24]
     xor rcx, rcx
@@ -105,4 +106,3 @@ imprime_numero:
     ret
 
 _start:
-
