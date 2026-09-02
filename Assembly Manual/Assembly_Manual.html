@@ -156,6 +156,50 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
     <div class="prompt-line">root@ic3101:~$ less referencia_completa.md<span class="cursor"></span></div>
   </header>
 
+  <!-- =========== NUEVO: REGISTROS =========== -->
+  <section class="block">
+    <div class="sec-title">Registros <small>qué hace cada uno — x86-64 y ARM AA32</small></div>
+    <div class="two-col">
+      <div class="card">
+        <div class="colhead">x86-64 (NASM)</div>
+        <table>
+          <tr><th>Registro</th><th>Qué hace / convención</th></tr>
+          <tr><td class="reg">rax</td><td>Acumulador. Número de syscall antes de "syscall", valor de retorno después. También destino por defecto en mul/div.</td></tr>
+          <tr><td class="reg">rbx</td><td>Registro general. Históricamente "base", pero hoy es de propósito general — muy usado como índice o valor temporal preservado entre llamadas.</td></tr>
+          <tr><td class="reg">rcx</td><td>Contador — usado automáticamente por "loop" y por instrucciones de repetición (rep). <b>Se pisa durante "syscall"</b> (guarda ahí la dirección de retorno).</td></tr>
+          <tr><td class="reg">rdx</td><td>3er argumento de syscall. En mul/div de 64 bits, junto con rax forma el par rdx:rax (dividendo de 128 bits / resto de la división).</td></tr>
+          <tr><td class="reg">rsi</td><td>2do argumento de syscall — "source index", típicamente el puntero de origen (buffer a leer/escribir).</td></tr>
+          <tr><td class="reg">rdi</td><td>1er argumento de syscall — "destination index", típicamente el file descriptor o destino.</td></tr>
+          <tr><td class="reg">rbp</td><td>Base pointer — apunta al inicio del stack frame actual (útil para acceder a variables locales/argumentos en funciones con muchos parámetros).</td></tr>
+          <tr><td class="reg">rsp</td><td>Stack pointer — apunta al tope actual de la pila. push/pop lo mueven automáticamente. NUNCA lo pises a mano sin saber lo que hacés.</td></tr>
+          <tr><td class="reg">r8 - r9</td><td>5to y 6to argumento de syscall. Registros de propósito general adicionales (extensión de x86-64 sobre el x86 de 32 bits).</td></tr>
+          <tr><td class="reg">r10</td><td>4to argumento de syscall (ojo: en llamadas a funciones C normales el 4to argumento es rcx, pero en syscalls es r10 — rcx está ocupado por el propio mecanismo de "syscall").</td></tr>
+          <tr><td class="reg">r11</td><td>Registro general. <b>Se pisa durante "syscall"</b> (guarda ahí las flags). No confiar en su valor después de un syscall si no lo guardaste antes.</td></tr>
+          <tr><td class="reg">r12 - r15</td><td>Registros generales libres, sin rol fijo en la convención de syscalls — ideales para guardar valores que necesitás que sobrevivan varias syscalls seguidas (como hicimos con num1/num2).</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="colhead">ARM AA32 (GAS)</div>
+        <table>
+          <tr><th>Registro</th><th>Qué hace / convención</th></tr>
+          <tr><td class="reg">r0</td><td>1er argumento de syscall, y registro de retorno de valores (resultado de una función/syscall aparece acá).</td></tr>
+          <tr><td class="reg">r1</td><td>2do argumento de syscall.</td></tr>
+          <tr><td class="reg">r2</td><td>3er argumento de syscall.</td></tr>
+          <tr><td class="reg">r3</td><td>4to argumento de syscall / registro general.</td></tr>
+          <tr><td class="reg">r4 - r6</td><td>Registros generales, sin rol fijo — libres para usar como variables/índices/base de buffer (los usamos así en el código).</td></tr>
+          <tr><td class="reg">r7</td><td><b>Número de syscall</b> — el equivalente ARM de rax en x86 para esto específicamente.</td></tr>
+          <tr><td class="reg">r8 - r10</td><td>Registros generales adicionales, libres para variables temporales o valores que deben sobrevivir varias instrucciones (los usamos como scratch en las subrutinas).</td></tr>
+          <tr><td class="reg">r11 (fp)</td><td>Frame pointer por convención (AAPCS), pero en código simple sin funciones anidadas complejas se puede usar como registro general (lo hicimos para guardar num1).</td></tr>
+          <tr><td class="reg">r12 (ip)</td><td>"Intra-procedure call scratch register" — de uso libre entre llamadas, lo usamos para num2.</td></tr>
+          <tr><td class="reg">r13 (sp)</td><td>Stack pointer — pila de llamadas, se mueve automáticamente con push/pop.</td></tr>
+          <tr><td class="reg">r14 (lr)</td><td>Link register — guarda la dirección de retorno cuando hacés "bl" (branch+link). Por eso hay que hacer push/pop de lr en cualquier subrutina que a su vez llame a otra.</td></tr>
+          <tr><td class="reg">r15 (pc)</td><td>Program counter — apunta a la instrucción actual (con offset de pipeline). Escribirlo directamente equivale a un salto.</td></tr>
+          <tr><td class="reg">cpsr</td><td>"Current Program Status Register" — contiene las flags (N,Z,C,V) que leen los sufijos de condición (eq, ne, lt...).</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <!-- DIRECTIVAS DE DATOS -->
   <section class="block">
     <div class="sec-title">Directivas de datos <small>reservar espacio vs. definir valores ya inicializados</small></div>
@@ -332,6 +376,43 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
       </table>
     </div>
   </section>
+
+  <!-- =========== NUEVO: TABLA DE SYSCALLS EXPANDIDA =========== -->
+  <section class="block">
+    <div class="sec-title">Syscalls de Linux más comunes <small>número en rax (x86-64) y r7 (ARM), argumentos y qué hace</small></div>
+    <div class="card">
+      <table>
+        <tr><th>Syscall</th><th>rax (x86-64)</th><th>r7 (ARM)</th><th>Argumentos</th><th>Qué hace</th></tr>
+        <tr><td class="reg">read</td><td class="dim">0</td><td class="dim">3</td><td class="dim">fd, buf, count</td><td>Lee bytes desde un file descriptor hacia un buffer.</td></tr>
+        <tr><td class="reg">write</td><td class="dim">1</td><td class="dim">4</td><td class="dim">fd, buf, count</td><td>Escribe bytes desde un buffer hacia un file descriptor.</td></tr>
+        <tr><td class="reg">open</td><td class="dim">2</td><td class="dim">5</td><td class="dim">path, flags, mode</td><td>Abre (o crea) un archivo, devuelve un file descriptor en rax/r0.</td></tr>
+        <tr><td class="reg">close</td><td class="dim">3</td><td class="dim">6</td><td class="dim">fd</td><td>Cierra un file descriptor previamente abierto.</td></tr>
+        <tr><td class="reg">lseek</td><td class="dim">8</td><td class="dim">19</td><td class="dim">fd, offset, whence</td><td>Mueve el puntero de lectura/escritura dentro de un archivo abierto.</td></tr>
+        <tr><td class="reg">mmap</td><td class="dim">9</td><td class="dim">192</td><td class="dim">addr, len, prot, flags, fd, offset</td><td>Mapea memoria (archivo o anónima) al espacio de direcciones del proceso.</td></tr>
+        <tr><td class="reg">brk</td><td class="dim">12</td><td class="dim">45</td><td class="dim">addr</td><td>Ajusta el tamaño del "heap" del programa (usado internamente por malloc-like allocators).</td></tr>
+        <tr><td class="reg">rt_sigaction</td><td class="dim">13</td><td class="dim">174</td><td class="dim">signum, act, oldact</td><td>Define qué hacer cuando el proceso recibe una señal (ej. SIGINT).</td></tr>
+        <tr><td class="reg">access</td><td class="dim">21</td><td class="dim">33</td><td class="dim">path, mode</td><td>Verifica permisos de acceso a un archivo sin abrirlo.</td></tr>
+        <tr><td class="reg">fork</td><td class="dim">57</td><td class="dim">2</td><td class="dim">—</td><td>Duplica el proceso actual — crea un proceso hijo casi idéntico.</td></tr>
+        <tr><td class="reg">execve</td><td class="dim">59</td><td class="dim">11</td><td class="dim">path, argv, envp</td><td>Reemplaza el proceso actual por un nuevo programa.</td></tr>
+        <tr><td class="reg">exit</td><td class="dim">60</td><td class="dim">1</td><td class="dim">código</td><td>Termina el proceso actual (solo el hilo/proceso que llama).</td></tr>
+        <tr><td class="reg">exit_group</td><td class="dim">231</td><td class="dim">248</td><td class="dim">código</td><td>Termina TODOS los hilos del proceso, no solo el actual (la que usa libc por defecto al salir de main).</td></tr>
+        <tr><td class="reg">wait4</td><td class="dim">61</td><td class="dim">114</td><td class="dim">pid, status, options, rusage</td><td>Espera a que un proceso hijo termine (usado junto a fork).</td></tr>
+        <tr><td class="reg">kill</td><td class="dim">62</td><td class="dim">37</td><td class="dim">pid, signal</td><td>Envía una señal a otro proceso (ej. para terminarlo).</td></tr>
+        <tr><td class="reg">getpid</td><td class="dim">39</td><td class="dim">20</td><td class="dim">—</td><td>Devuelve el PID (identificador) del proceso actual.</td></tr>
+        <tr><td class="reg">nanosleep</td><td class="dim">35</td><td class="dim">162</td><td class="dim">req, rem</td><td>Pausa el proceso por un tiempo especificado (en segundos+nanosegundos).</td></tr>
+        <tr><td class="reg">stat / fstat</td><td class="dim">4 / 5</td><td class="dim">106 / 108</td><td class="dim">path/fd, statbuf</td><td>Obtiene metadatos de un archivo (tamaño, permisos, fechas...).</td></tr>
+        <tr><td class="reg">mkdir</td><td class="dim">83</td><td class="dim">39</td><td class="dim">path, mode</td><td>Crea un nuevo directorio.</td></tr>
+        <tr><td class="reg">unlink</td><td class="dim">87</td><td class="dim">10</td><td class="dim">path</td><td>Borra un archivo (elimina su entrada del sistema de archivos).</td></tr>
+      </table>
+      <p style="font-size:11px; color:var(--text-dim); margin-top:10px;">
+        fd: 0 = stdin, 1 = stdout, 2 = stderr &nbsp;·&nbsp; los números de ARM corresponden a la tabla clásica
+        <span class="cm">int 0x80</span>/EABI de 32 bits, reutilizada por <span class="cm">svc 0</span> &nbsp;·&nbsp;
+        lista completa siempre en <span class="cm">/usr/include/asm/unistd_64.h</span> (x86-64) o
+        <span class="cm">/usr/include/asm-generic/unistd.h</span> (ARM EABI).
+      </p>
+    </div>
+  </section>
+
 
   <!-- =========== NUEVO: STEP BY STEP =========== -->
   <section class="block">

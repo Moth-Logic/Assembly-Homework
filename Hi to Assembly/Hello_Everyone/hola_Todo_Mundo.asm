@@ -8,13 +8,13 @@ DEFAULT ABS
 section .data
     ; menu
     menu:           db 10, "Seleccione un mensaje:", 10
-                     db "  a. Hola Mundo!!!", 10
-                     db "  b. Feliz Dia del Amor y la Amistad!!!", 10
-                     db "  c. Feliz Navidad!!!", 10
-                     db "  d. Feliz Dia de la Independencia!!!", 10
-                     db "  e. Otro (ingrese su propio mensaje)", 10
-                     db "  f. Finalizar el programa", 10
-                     db "Opcion: "
+                    db "  a. Hola Mundo!!!", 10
+                    db "  b. Feliz Dia del Amor y la Amistad!!!", 10
+                    db "  c. Feliz Navidad!!!", 10
+                    db "  d. Feliz Dia de la Independencia!!!", 10
+                    db "  e. Otro (ingrese su propio mensaje)", 10
+                    db "  f. Finalizar el programa", 10
+                    db "Opcion: "
     len_menu:       equ $ - menu        ; longitud total del menu (bytes)
 
     ; mensajes
@@ -33,9 +33,9 @@ section .data
 
     ;"ver otro mensaje?"
     prompt_continuar: db 10, "Quieres ver otro mensaje?", 10
-                       db "  1. Si", 10
-                       db "  2. No, finalizar", 10
-                       db "Opcion: "
+                        db "  1. Si", 10
+                        db "  2. No, finalizar", 10
+                        db "Opcion: "
     len_continuar:  equ $ - prompt_continuar
 
     ; mensaje de error
