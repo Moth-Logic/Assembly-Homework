@@ -61,4 +61,48 @@ lee_numero:
 
 .parse_invalido:
     mov r15b, 1
-    ret 
+    ret
+
+imprime_numero:
+    xor r14, r14
+    cmp rax 0
+    jge .es_positivo
+    mov r14, 1
+    neg rax
+.es_positivo:
+    lea rdi, [r10 + 24]
+    xor rcx, rcx
+
+    cmp rax, 0
+    jne .conv_loop
+    dec rdi
+    mov byte [rdi], '0'
+    inc rcx
+    jmp .conv_fin
+
+.conv_loop:
+    cmp rax , 0
+    je .conv_fin
+    xor rdx, rdx
+    mov rbx, 10
+    div rbx
+    add dl, '0'
+    dec rdi
+    mov [rdi], dl
+    inc rcx
+    jmp .conv_loop
+
+.conv_fin:
+    cmp r14, 0
+    jne .sin_signo
+    dec rdi
+    mov byte [rdi], '-'
+    inc rcx
+
+.sin_signo:
+    mov rsi, rdi
+    mov rdx, rcx
+    ret
+
+_start:
+
