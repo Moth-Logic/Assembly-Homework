@@ -156,8 +156,45 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
     <div class="prompt-line">root@ic3101:~$ less referencia_completa.md<span class="cursor"></span></div>
   </header>
 
+  <!-- =========== NUEVO: INDICE =========== -->
+  <section class="block" id="sec-indice">
+    <div class="sec-title">Índice rápido <small>saltá directo a la sección que necesitás</small></div>
+    <div class="card">
+      <div class="two-col">
+        <div>
+          <div class="colhead">Referencia de sintaxis</div>
+          <table>
+            <tr><td class="dim">→</td><td><a href="#sec-registros" style="color:var(--green);text-decoration:none;">Registros</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-dir-datos" style="color:var(--green);text-decoration:none;">Directivas de datos</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-dir-estructurales" style="color:var(--green);text-decoration:none;">Directivas estructurales</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-movimiento" style="color:var(--green);text-decoration:none;">Movimiento de datos</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-direccionamiento" style="color:var(--green);text-decoration:none;">Modos de direccionamiento</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-aritmetica" style="color:var(--green);text-decoration:none;">Aritmética</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-logica" style="color:var(--green);text-decoration:none;">Lógica y bits</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-comparacion" style="color:var(--green);text-decoration:none;">Comparación</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-saltos" style="color:var(--green);text-decoration:none;">Saltos y ramas</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-syscall-control" style="color:var(--green);text-decoration:none;">Syscalls y control de flujo</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-convencion" style="color:var(--green);text-decoration:none;">Convención de llamada (funciones propias)</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-syscalls-tabla" style="color:var(--green);text-decoration:none;">Tabla de syscalls Linux</a></td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="colhead">Cómo armar tu programa</div>
+          <table>
+            <tr><td class="dim">→</td><td><a href="#sec-pasos" style="color:var(--green);text-decoration:none;">Pasos, de la idea al ejecutable</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-esqueleto" style="color:var(--green);text-decoration:none;">Esqueleto narrado de un .asm</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-ascii" style="color:var(--green);text-decoration:none;">Tabla ASCII rápida</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-snippets" style="color:var(--green);text-decoration:none;">Códigos comunes (copiar/pegar)</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-build" style="color:var(--green);text-decoration:none;">Ensamblar, enlazar y Makefile</a></td></tr>
+            <tr><td class="dim">→</td><td><a href="#sec-gotchas" style="color:var(--green);text-decoration:none;">Gotchas, debugging y checklist</a></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- =========== NUEVO: REGISTROS =========== -->
-  <section class="block">
+  <section class="block" id="sec-registros">
     <div class="sec-title">Registros <small>qué hace cada uno — x86-64 y ARM AA32</small></div>
     <div class="two-col">
       <div class="card">
@@ -201,7 +238,7 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
   </section>
 
   <!-- DIRECTIVAS DE DATOS -->
-  <section class="block">
+  <section class="block" id="sec-dir-datos">
     <div class="sec-title">Directivas de datos <small>reservar espacio vs. definir valores ya inicializados</small></div>
     <div class="card">
       <table>
@@ -227,7 +264,7 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
   </section>
 
   <!-- DIRECTIVAS ESTRUCTURALES -->
-  <section class="block">
+  <section class="block" id="sec-dir-estructurales">
     <div class="sec-title">Directivas estructurales / de ensamblado</div>
     <div class="card">
       <table>
@@ -245,7 +282,7 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
   </section>
 
   <!-- MOVIMIENTO DE DATOS -->
-  <section class="block">
+  <section class="block" id="sec-movimiento">
     <div class="sec-title">Movimiento de datos</div>
     <div class="card">
       <table>
@@ -263,8 +300,39 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
     </div>
   </section>
 
+  <!-- =========== NUEVO: MODOS DE DIRECCIONAMIENTO =========== -->
+  <section class="block" id="sec-direccionamiento">
+    <div class="sec-title">Modos de direccionamiento <small>las distintas formas de decir "leé/escribí en esta dirección"</small></div>
+    <div class="two-col">
+      <div class="card">
+        <div class="colhead">x86-64 (NASM) — [base + índice*escala + desplazamiento]</div>
+        <table>
+          <tr><th>Modo</th><th>Ejemplo</th><th>Qué hace</th></tr>
+          <tr><td class="reg">Inmediato</td><td class="reg dim">mov rax, 5</td><td>El valor está escrito directo en la instrucción.</td></tr>
+          <tr><td class="reg">Registro</td><td class="reg dim">mov rax, rbx</td><td>El valor está en otro registro.</td></tr>
+          <tr><td class="reg">Directo</td><td class="reg dim">mov rax, [msg]</td><td>Lee desde la dirección fija de la etiqueta "msg".</td></tr>
+          <tr><td class="reg">Indirecto</td><td class="reg dim">mov rax, [rbx]</td><td>Lee desde la dirección que hay guardada DENTRO de rbx.</td></tr>
+          <tr><td class="reg">Base + desplaz.</td><td class="reg dim">mov al, [buffer + rbx]</td><td>Lee el byte que está "rbx posiciones" después de donde empieza buffer — el patrón típico de un loop sobre un array.</td></tr>
+          <tr><td class="reg">Base + índice*escala</td><td class="reg dim">mov eax, [arr + rbx*4]</td><td>Igual, pero multiplicando el índice por el tamaño de cada elemento (4 = un entero de 32 bits) — así rbx cuenta "elementos", no bytes.</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="colhead">ARM AA32 (GAS) — [Rn], [Rn, #off], [Rn, #off]!, [Rn], #off</div>
+        <table>
+          <tr><th>Modo</th><th>Ejemplo</th><th>Qué hace</th></tr>
+          <tr><td class="reg">Inmediato</td><td class="reg dim">mov r0, #5</td><td>El valor está escrito directo en la instrucción.</td></tr>
+          <tr><td class="reg">Registro</td><td class="reg dim">mov r0, r1</td><td>El valor está en otro registro.</td></tr>
+          <tr><td class="reg">Offset (base)</td><td class="reg dim">ldr r0, [r1, #4]</td><td>Lee desde (dirección en r1) + 4, sin modificar r1.</td></tr>
+          <tr><td class="reg">Offset con registro</td><td class="reg dim">ldrb r0, [r6, r5]</td><td>Lee el byte en (dirección en r6) + (valor de r5) — el patrón típico de un loop sobre un buffer.</td></tr>
+          <tr><td class="reg">Pre-indexado</td><td class="reg dim">ldr r0, [r1, #4]!</td><td>Primero suma 4 a r1 (r1 queda actualizado), DESPUÉS lee desde ahí.</td></tr>
+          <tr><td class="reg">Post-indexado</td><td class="reg dim">ldr r0, [r1], #4</td><td>Primero lee desde r1 tal cual estaba, DESPUÉS le suma 4 a r1 — útil para recorrer un array avanzando solo el puntero.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <!-- ARITMETICA -->
-  <section class="block">
+  <section class="block" id="sec-aritmetica">
     <div class="sec-title">Aritmética</div>
     <div class="card">
       <table>
@@ -284,7 +352,7 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
   </section>
 
   <!-- LOGICA Y BITS -->
-  <section class="block">
+  <section class="block" id="sec-logica">
     <div class="sec-title">Lógica y manipulación de bits</div>
     <div class="card">
       <table>
@@ -303,7 +371,7 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
   </section>
 
   <!-- COMPARACION -->
-  <section class="block">
+  <section class="block" id="sec-comparacion">
     <div class="sec-title">Comparación</div>
     <div class="card">
       <table>
@@ -317,7 +385,7 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
   </section>
 
   <!-- SALTOS -->
-  <section class="block">
+  <section class="block" id="sec-saltos">
     <div class="sec-title">Saltos y ramas <small>incondicionales, condicionales, y con signo/sin signo</small></div>
     <div class="two-col">
       <div class="card">
@@ -364,7 +432,7 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
   </section>
 
   <!-- SYSCALLS Y CONTROL -->
-  <section class="block">
+  <section class="block" id="sec-syscall-control">
     <div class="sec-title">Llamadas al sistema y control de flujo</div>
     <div class="card">
       <table>
@@ -377,8 +445,35 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
     </div>
   </section>
 
+  <!-- =========== NUEVO: CONVENCION DE LLAMADA =========== -->
+  <section class="block" id="sec-convencion">
+    <div class="sec-title">Convención de llamada — cómo escribir tus propias subrutinas <small>la causa #1 de bugs raros en programas con "call"/"bl"</small></div>
+    <div class="card">
+      <p style="font-size:11.8px; line-height:1.85; color:var(--text); margin:0 0 12px;">
+        Cuando escribís tu propia función (no una syscall), vos decidís qué registros usar — pero el CPU
+        no "limpia" ni "guarda" nada solo. Si una función A llama a una función B, y B usa un registro que
+        A todavía necesitaba, ese valor se pierde en silencio: no hay error de ensamblado ni crash, el
+        programa simplemente calcula mal. Suele ser el bug más difícil de encontrar a simple vista.
+      </p>
+      <table>
+        <tr><th>Concepto</th><th>x86-64 (SysV)</th><th>ARM AA32 (AAPCS)</th></tr>
+        <tr><td class="reg">Argumentos (en orden)</td><td class="reg dim">rdi, rsi, rdx, rcx, r8, r9</td><td class="reg dim">r0, r1, r2, r3</td></tr>
+        <tr><td class="reg">Valor de retorno</td><td class="reg dim">rax</td><td class="reg dim">r0</td></tr>
+        <tr><td class="reg">Caller-saved <span class="tag">se pueden perder en cualquier call</span></td><td class="reg dim">rax, rcx, rdx, rsi, rdi, r8-r11</td><td class="reg dim">r0-r3, r12</td></tr>
+        <tr><td class="reg">Callee-saved <span class="tag">sobreviven un call si la función los respeta</span></td><td class="reg dim">rbx, rbp, r12-r15</td><td class="reg dim">r4-r11</td></tr>
+        <tr><td class="reg">Dirección de retorno</td><td class="reg dim">queda en la pila (push automático de "call")</td><td class="reg dim">queda en lr — hacé push/pop de lr si tu función llama a otra</td></tr>
+      </table>
+      <p style="font-size:11.5px; line-height:1.8; color:var(--amber); margin-top:12px; font-style:italic;">
+        → Regla de oro: si un valor tiene que sobrevivir un "call"/"bl", o lo movés a un registro
+        callee-saved (r12-r15 / r4-r11) antes de llamar, o lo guardás vos mismo con push antes del call
+        y lo recuperás con pop después. Nunca asumas que un registro caller-saved (rax/rdi/rsi/rdx/rcx
+        en x86, r0-r3 en ARM) va a seguir teniendo lo mismo después de un call.
+      </p>
+    </div>
+  </section>
+
   <!-- =========== NUEVO: TABLA DE SYSCALLS EXPANDIDA =========== -->
-  <section class="block">
+  <section class="block" id="sec-syscalls-tabla">
     <div class="sec-title">Syscalls de Linux más comunes <small>número en rax (x86-64) y r7 (ARM), argumentos y qué hace</small></div>
     <div class="card">
       <table>
@@ -415,7 +510,7 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
 
 
   <!-- =========== NUEVO: STEP BY STEP =========== -->
-  <section class="block">
+  <section class="block" id="sec-pasos">
     <div class="sec-title">Cómo armar tu programa de ensamblador, paso a paso <small>de la idea al ejecutable</small></div>
     <div class="card">
       <table>
@@ -435,7 +530,7 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
   </section>
 
   <!-- =========== NUEVO: QUE NECESITAS PARA ARMAR UN .ASM =========== -->
-  <section class="block">
+  <section class="block" id="sec-esqueleto">
     <div class="sec-title">Qué necesitás para armar un .asm desde cero <small>el esqueleto narrado, NASM y GAS en paralelo</small></div>
     <div class="card">
       <p style="font-size:11.8px; line-height:1.85; color:var(--text); margin:0 0 12px;">
@@ -496,8 +591,25 @@ INICIANDO SHELL IC-3101.....<span class="ok">LISTO</span>
     </div>
   </section>
 
+  <!-- =========== NUEVO: TABLA ASCII =========== -->
+  <section class="block" id="sec-ascii">
+    <div class="sec-title">Tabla ASCII rápida <small>los rangos que más se usan para validar/transformar texto</small></div>
+    <div class="card">
+      <table>
+        <tr><th>Rango / carácter</th><th>Hex</th><th>Decimal</th><th>Para qué sirve</th></tr>
+        <tr><td class="reg">'0'-'9'</td><td class="reg dim">0x30-0x39</td><td class="dim">48-57</td><td>Dígitos numéricos — restar 0x30 (o '0') convierte el carácter en su valor entero.</td></tr>
+        <tr><td class="reg">'A'-'Z'</td><td class="reg dim">0x41-0x5A</td><td class="dim">65-90</td><td>Letras mayúsculas.</td></tr>
+        <tr><td class="reg">'a'-'z'</td><td class="reg dim">0x61-0x7A</td><td class="dim">97-122</td><td>Letras minúsculas.</td></tr>
+        <tr><td class="reg">Espacio</td><td class="reg dim">0x20</td><td class="dim">32</td><td>Carácter de espacio en blanco.</td></tr>
+        <tr><td class="reg">'\n'</td><td class="reg dim">0x0A</td><td class="dim">10</td><td>Salto de línea — típicamente lo que devuelve "read" al final del input.</td></tr>
+        <tr><td class="reg">'\0'</td><td class="reg dim">0x00</td><td class="dim">0</td><td>Terminador nulo — usado en .asciz y para marcar el final de un string.</td></tr>
+        <tr><td class="reg">Diferencia mayús./minús.</td><td class="reg dim">0x20</td><td class="dim">32</td><td>Toda letra minúscula = su mayúscula + 0x20. Por eso "xor al, 0x20" / "eor r0, r0, #0x20" alterna entre las dos.</td></tr>
+      </table>
+    </div>
+  </section>
+
   <!-- =========== NUEVO: CODIGOS COMUNES / SNIPPETS =========== -->
-  <section class="block">
+  <section class="block" id="sec-snippets">
     <div class="sec-title">Códigos comunes <small>bloques listos para copiar y pegar en tus proyectos</small></div>
 
     <div class="two-col" style="margin-bottom:14px;">
@@ -631,8 +743,43 @@ strb r0, [r6, r5]</pre>
     </div>
   </section>
 
+  <!-- =========== NUEVO: BUILD / MAKEFILE =========== -->
+  <section class="block" id="sec-build">
+    <div class="sec-title">Ensamblar, enlazar y Makefile <small>de .asm/.s a ejecutable, a mano y automatizado</small></div>
+    <div class="two-col" style="margin-bottom:14px;">
+      <div class="card">
+        <div class="colhead">A mano — NASM x86-64</div>
+        <pre style="white-space:pre-wrap; font-size:11px; line-height:1.6; color:var(--green); margin:0;">nasm -f elf64 programa.asm -o programa.o
+ld programa.o -o programa
+./programa</pre>
+        <span class="expl" style="margin-top:8px;">-f elf64: formato de archivo objeto de 64 bits · ld enlaza el .o y genera el ejecutable final</span>
+      </div>
+      <div class="card">
+        <div class="colhead">A mano — GAS ARM AA32</div>
+        <pre style="white-space:pre-wrap; font-size:11px; line-height:1.6; color:var(--green); margin:0;">as programa.s -o programa.o
+ld programa.o -o programa
+./programa</pre>
+        <span class="expl" style="margin-top:8px;">en una Raspberry Pi (ARM nativo) no hace falta flag de arquitectura extra · cruzando desde x86 se necesita un toolchain arm-linux-gnueabihf</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="colhead">Makefile mínimo (mismo patrón para NASM o GAS, cambiando el paso de ensamblado)</div>
+      <pre style="white-space:pre-wrap; font-size:11px; line-height:1.6; color:var(--green); margin:0;">programa: programa.o
+	ld programa.o -o programa
+
+programa.o: programa.asm
+	nasm -f elf64 programa.asm -o programa.o
+
+clean:
+	rm -f programa.o programa
+
+.PHONY: clean</pre>
+      <span class="expl" style="margin-top:8px;">las líneas de comando de un Makefile empiezan con TAB, no con espacios — es el error más común al copiar/pegar esto</span>
+    </div>
+  </section>
+
   <!-- =========== NUEVO: INFO IMPORTANTE =========== -->
-  <section class="block">
+  <section class="block" id="sec-gotchas">
     <div class="sec-title">Otra información importante <small>gotchas, debugging, y cosas que se te olvidan la primera vez</small></div>
     <div class="two-col">
       <div class="card">
