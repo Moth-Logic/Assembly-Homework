@@ -1,108 +1,219 @@
+; Integrantes: José Julián Solórzano Hernández & Abril Guadalupe Morales Gonzales Morales
+
 section .data
-    num1: db "Ingrese primer numero: ", 10
-    len_1: equ $ - num1
-    num2: db "Ingrese segundo numero: ", 10 
-    len_2: equ $ - num2
-    sum_msg: db "La suma es: ", 10
-    len_sum: equ $ - sum_msg
-    sub_msg: db "La resta es: ", 10
-    len_sub: equ $ - sub_msg
-    error_msg: db "Error: Ingrese solo numeros.", 10
-    len_error: equ $ - error_msg
+    msg_num1:      db "Ingrese primer numero: ", 0
+    msg_num2:      db "Ingrese segundo numero: ", 0
+    msg_sum:       db "La suma es: ", 0
+    msg_sub:       db "La resta es: ", 0
+    msg_error:     db "Error: Ingrese solo numeros.", 10, 0
+    newline:       db 10, 0
+    
+    SYS_READ:      equ 0
+    SYS_WRITE:     equ 1
+    SYS_EXIT:      equ 60
+    STDIN:         equ 0
+    STDOUT:        equ 1
+    MAX_INPUT:     equ 22
+    MAX_OUTPUT:    equ 24
 
 section .bss
-    buf1: resb 22
-    buf2: resb 22   
-    outbuf: resb 24
+    buffer1:       resb MAX_INPUT
+    buffer2:       resb MAX_INPUT
+    output_buf:    resb MAX_OUTPUT
+    num_str:       resb MAX_INPUT
 
 section .text
     global _start
 
-lee_numero:
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, r8
-    mov rdx, r9
+print_string:
+    push rbx
+    push rcx
+    push rdx
+    
+    xor rcx, rcx
+    
+.count_loop:
+    cmp byte [rdi + rcx], 0
+    je .print_it
+    inc rcx
+    jmp .count_loop
+    
+.print_it:
+    mov rax, SYS_WRITE
+    mov rsi, rdi
+    mov rdi, STDOUT
+    mov rdx, rcx
     syscall
+    
+    pop rdx
+    pop rcx
+    pop rbx
+    ret
 
-    mov rax, 0
-    mov rdi, 0
-    mov rsi, r10
-    mov rdx, 22
+read_number:
+    push rbx
+    push rcx
+    push rdx
+    push rsi
+    push rdi
+    
+    call print_string
+    
+    mov rax, SYS_READ
+    mov rdi, STDIN
+    mov rsi, rsi
+    mov rdx, MAX_INPUT - 1
     syscall
-
+    
+    dec rax
     mov rcx, rax
-    dec rcx
-
-    xor rbx, rcx
+    
+    cmp rcx, 0
+    jle .error
+    
     xor rax, rax
-
+    xor rbx, rbx
+    xor r9, r9
+    
 .parse_loop:
     cmp rbx, rcx
-    jge .parse_valido
-
-    movzx r13d, byte [r10 + rbx]
-
-    cmp r13b, '0'
-    jl .parse_invalido
-    cmp r13b, '9'
-    jg .parse_invalido
-
+    jge .done_parsing
+    
+    movzx r8, byte [rsi + rbx]
+    
+    cmp r8, '0'
+    jl .error
+    cmp r8, '9'
+    jg .error
+    
+    mov r9, 1
     imul rax, rax, 10
-    sub r13b, '0'
-    add rax, r13
-
+    sub r8, '0'
+    add rax, r8
+    
     inc rbx
     jmp .parse_loop
-
-.parse_valido:
-    mov r15b, 0
+    
+.done_parsing:
+    cmp r9, 0
+    je .error
+    
+    mov r15, 0
+    pop rdi
+    pop rsi
+    pop rdx
+    pop rcx
+    pop rbx
     ret
 
-.parse_invalido:
-    mov r15b, 1
+.error:
+    mov r15, 1
+    pop rdi
+    pop rsi
+    pop rdx
+    pop rcx
+    pop rbx
     ret
 
-imprime_numero:
-    xor r14, r14
-    cmp rax 0
-    jge .es_positivo
-    mov r14, 1
-    neg rax
-
-.es_positivo:
-    lea rdi, [r10 + 24]
-    xor rcx, rcx
-
+print_number:
+    push rax
+    push rbx
+    push rcx
+    push rdx
+    push rsi
+    push rdi
+    
+    call print_string
+    
+    lea rsi, [output_buf + MAX_OUTPUT - 1]
+    mov byte [rsi], 0
+    dec rsi
+    
     cmp rax, 0
-    jne .conv_loop
-    dec rdi
-    mov byte [rdi], '0'
-    inc rcx
-    jmp .conv_fin
-
-.conv_loop:
-    cmp rax , 0
-    je .conv_fin
+    jne .convert_loop
+    
+    mov byte [rsi], '0'
+    dec rsi
+    jmp .finish_output
+    
+.convert_loop:
+    cmp rax, 0
+    je .finish_output
+    
     xor rdx, rdx
     mov rbx, 10
     div rbx
+    
     add dl, '0'
-    dec rdi
-    mov [rdi], dl
-    inc rcx
-    jmp .conv_loop
-
-.conv_fin:
-    cmp r14, 0
-    jne .sin_signo
-    dec rdi
-    mov byte [rdi], '-'
-    inc rcx
-
-.sin_signo:
-    mov rsi, rdi
+    mov [rsi], dl
+    dec rsi
+    
+    jmp .convert_loop
+    
+.finish_output:
+    inc rsi
+    
+    mov rcx, output_buf
+    add rcx, MAX_OUTPUT - 1
+    sub rcx, rsi
+    
+    mov rax, SYS_WRITE
+    mov rdi, STDOUT
     mov rdx, rcx
+    syscall
+    
+    mov rax, SYS_WRITE
+    mov rdi, STDOUT
+    mov rsi, newline
+    mov rdx, 1
+    syscall
+    
+    pop rdi
+    pop rsi
+    pop rdx
+    pop rcx
+    pop rbx
+    pop rax
+    ret
+
+print_error:
+    mov rdi, msg_error
+    call print_string
     ret
 
 _start:
+    mov rdi, msg_num1
+    mov rsi, buffer1
+    call read_number
+    
+    cmp r15, 1
+    je .error_exit
+    mov r12, rax
+    
+    mov rdi, msg_num2
+    mov rsi, buffer2
+    call read_number
+    
+    cmp r15, 1
+    je .error_exit
+    mov r13, rax
+    
+    mov rax, r12
+    add rax, r13
+    mov rdi, msg_sum
+    call print_number
+    
+    mov rax, r12
+    sub rax, r13
+    mov rdi, msg_sub
+    call print_number
+    
+    mov rax, SYS_EXIT
+    xor rdi, rdi
+    syscall
+    
+.error_exit:
+    call print_error
+    mov rax, SYS_EXIT
+    mov rdi, 1
+    syscall
