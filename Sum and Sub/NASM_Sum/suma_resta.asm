@@ -1,5 +1,5 @@
-; Tarea Corta 02 - Actividad 3 (NASM x86-64, Linux syscalls)
-; Lee dos numeros, valida que sean solo digitos, e imprime su suma y su resta en decimal. Si algo no es numerico, aborta con error.
+; Lee dos numeros por stdin, valida que sean solo digitos, e imprime
+; su suma y su resta en decimal. Si algo no es numerico, aborta con error.
 
 section .data
     msg_num1  db "Ingrese primer numero: ", 0
@@ -25,6 +25,7 @@ section .text
     global _start
 
 ; Imprime un string terminado en 0.
+; rdi = puntero al string.
 print_string:
     xor     rcx, rcx
 .len:
@@ -41,8 +42,6 @@ print_string:
     ret
 
 ; Pide un numero por pantalla, lo lee y lo convierte de texto a entero.
-; rdi = mensaje a mostrar, rsi = buffer donde se guarda lo leido.
-; Devuelve: rax = valor parseado, CF=1 si hubo error (vacio o con caracteres no numericos).
 read_number:
     push    r12            ; guarda el puntero al buffer en un registro callee-saved
     mov     r12, rsi        ; asi sobrevive al call sin importar que haga print_string

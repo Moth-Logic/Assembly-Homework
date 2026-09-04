@@ -1,5 +1,5 @@
-@ Tarea Corta 02 - Actividad 3 (GAS, ARM AA32, Linux syscalls)
-@ Lee dos numeros por stdin, valida que sean solo digitos, e imprime su suma y su resta en decimal. Si algo no es numerico, aborta con error.
+@ Lee dos numeros por stdin, valida que sean solo digitos, e imprime
+@ su suma y su resta en decimal. Si algo no es numerico, aborta con error.
 
 .section .data
     msg_num1:  .asciz "Ingrese primer numero: "
@@ -8,8 +8,8 @@
     msg_sub:   .asciz "La resta es: "
     msg_error: .asciz "Error: Ingrese solo numeros.\n"
 
-    .equ MAX_IN,    14     @ 10 digitos
-    .equ MAX_OUT,   13     @ 10 digitos
+    .equ MAX_IN,    14     @ 10 digitos (<2^32) + margen
+    .equ MAX_OUT,   13     @ 10 digitos + signo + '\n' + null
     .equ STDIN,     0
     .equ STDOUT,    1
     .equ SYS_READ,  3
@@ -25,7 +25,9 @@
 .global _start
 
 @ Imprime un string terminado en 0.
-@ No preserva r0-r3: son caller-saved en AAPCS, asi que quien llame esto y necesite esos valores despues debe guardarlos antes.
+@ r0 = puntero al string.
+@ No preserva r0-r3: son caller-saved en AAPCS, asi que quien llame esto
+@ y necesite esos valores despues debe guardarlos antes.
 print_string:
     mov     r1, r0
     mov     r2, #0
@@ -40,8 +42,6 @@ print_string:
     bx      lr
 
 @ Pide un numero por pantalla, lo lee y lo convierte de texto a entero.
-@ r0 = mensaje a mostrar, r1 = buffer donde se guarda lo leido.
-@ Devuelve: r0 = valor parseado, r1 = 1 si hubo error (0 si ok).
 read_number:
     push    {r4, r5, lr}
     mov     r4, r1              @ guarda el puntero al buffer en un callee-saved,
@@ -70,7 +70,7 @@ read_number:
     bgt     .Lread_err
     sub     r3, r3, #'0'
     mov     r1, #10
-    mul     r0, r0, r1
+    mul     r0, r1, r0          @ orden r1,r0 (no r0,r0): Rd y Rm no deben coincidir en mul
     add     r0, r0, r3
     add     r2, r2, #1
     b       .Lparse
@@ -101,8 +101,10 @@ print_number:
     mov     r6, #1
     rsb     r4, r4, #0          @ a partir de aqui se trabaja con el valor absoluto
 
-.Lconv:                         @ ARM no tiene division simple, asi que se hace mano
-    mov     r2, #0          
+.Lconv:                         @ ARM no tiene division simple, asi que se hace
+                                @ a mano: resta 10 repetidas veces para sacar
+                                @ el cociente y el residuo de cada digito
+    mov     r2, #0              @ cociente parcial
 .Lsub:
     cmp     r4, #10
     blt     .Ldigit
@@ -148,7 +150,7 @@ _start:
     bl      read_number
     cmp     r1, #1
     beq     .Lerror
-    mov     r4, r0              @ primer numero (callee-saved)
+    mov     r4, r0              @ primer numero
 
     ldr     r0, =msg_num2
     ldr     r1, =buf2
